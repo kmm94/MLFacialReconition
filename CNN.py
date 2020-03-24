@@ -37,6 +37,7 @@ one_label = 0
 
 # show one image with spots
 def showOneImg(image, label):
+    #TODO: Color Left, right and nose and check dataset that left rigth and nose are set correctly
     fillTheCircle = -1
     color = (0, 0, 0)
     radius = 2
