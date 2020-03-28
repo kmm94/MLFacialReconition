@@ -5,3 +5,6 @@ ir størrelse = 480x640
 vores dataset består af billeder i størrelsen
 120 x 160 x 3
 240 x 320 x 3
+
+Eye localization netværk
+https://www.researchgate.net/publication/44261632_Convolutional_Neural_Networks_for_Eye_Detection_in_Remote_Gaze_Estimation_Systems

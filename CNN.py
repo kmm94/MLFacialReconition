@@ -153,29 +153,26 @@ model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding="same", acti
 model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
 model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
-model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(units=128, activation="relu"))
-model.add(tf.keras.layers.Dropout(0.25))
 model.add(tf.keras.layers.Dense(units=64, activation='relu'))
 model.add(tf.keras.layers.Dropout(0.5))
-model.add(tf.keras.layers.Dense(units=64, activation="relu"))
+model.add(tf.keras.layers.Dense(units=32, activation="relu"))
 model.add(tf.keras.layers.Dense(units=6))
 
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-filepath = "checkpoints/checkpointBlackAndWhite-{epoch:04d}.h5"
+filepath = "checkpoints/checkpointBAWresearchA-{epoch:04d}-{val_loss:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath,
-                            monitor='accuracy',
+                            monitor='val_accuracy',
                             verbose=1,
                             save_best_only=True,
-                            mode='auto')
+                            mode='auto',
+                             period=50)
 
 
-csv_fileName = "logs/CSV_log_BlackAndWhite.csv"
+csv_fileName = "logs/CSV_log_BAWresearchA.csv"
 logger = tf.keras.callbacks.CSVLogger(
     csv_fileName, separator=',', append=False
 )
@@ -189,7 +186,7 @@ model.save("./savedModels/myModelBlackAndWhite.h5")
 def test_model(model):
     list_to_validation = "./FinalDataSet/FlirOneTestBilleder/*.jpg"
     for i in range(1, 10):
-        img_resized, labels_resized = reSizeImgAndLabels(npImgArray[i], npLabelArray[i], 1)
+        img_resized, labels_resized = reSizeImgAndLabels(npImgArray[i], npLabelArray[i])
         test_img_input = np.reshape(img_resized, (1,240,320,1))
         prediction = model.predict(test_img_input)  # shape = [batch_size, values]
         print(prediction[0])
