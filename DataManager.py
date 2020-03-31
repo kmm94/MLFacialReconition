@@ -55,7 +55,6 @@ def showOneImg(image, label=None):
 
 def up_size(img, labels, scale):
     # times of original size
-    # TODO: investigate X x Y
     width = int(img.shape[1] * scale)
     height = int(img.shape[0] * scale)
     dim = (width, height)
@@ -77,8 +76,6 @@ def down_size(img, labels):
     dim = (width, height)
     # resize image
     img_resized = cv2.resize(img, dim, interpolation=cv2.INTER_NEAREST)
-    cv2.imshow("test 2 ", img_resized)
-    cv2.waitKey(0)
     labels_resized = []
     index = 0
     for i in labels:
@@ -112,16 +109,12 @@ def mirrorIMG(image, label):
     fliped_labels.append(int(IMG_WIDTH - label[5]))
     return fliped_img, fliped_labels
 
-def make_square(img, min_size=320):
-    
-    color = [0, 0, 0] # 'cause purple!
-
-    # border widths; I set them all to 150
-
+def make_square(img, labels, min_size=320):
+    color = [0, 0, 0] # 'cause black!
     imgShape = img.shape[:2]
     addBoaderToWidth = min_size - imgShape[1]
-    addBoaderToHeigth = min_size - imgShape[0]    
-    
+    addBoaderToHeigth = min_size - imgShape[0]
+
     if(addBoaderToWidth <= 0):
         left, right = 0,0
     if (addBoaderToHeigth <= 0):
@@ -131,9 +124,18 @@ def make_square(img, min_size=320):
     if (addBoaderToHeigth > 0):
         top, bottom,= int(addBoaderToHeigth/2), int(addBoaderToHeigth/2)
 
+    labels_resized = []
+    index = 0
+    for i in labels:
+        if (index % 2 == 0):
+            labels_resized.append(int(i + (addBoaderToWidth/2)))
+        else:
+            labels_resized.append(int(i + (addBoaderToHeigth/2)))
+        index +=1
+
     
     img_with_border = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
-    return img_with_border
+    return img_with_border, labels_resized
 
 
 def getGrayImages():
@@ -184,8 +186,6 @@ def getColorImages():
                 img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
                             int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
                 img = cv2.imread(image_path)
-                cv2.imshow("test ", img)
-                cv2.waitKey(0)
                 imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
                 one_image = imgResape
                 one_label = labelResape
@@ -214,14 +214,15 @@ def getColorImagesAsRect():
                             int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
                 img = cv2.imread(image_path)
                 imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
-                one_image = imgResape
-                one_label = labelResape
                 imgNormalization = imgResape / 255.0
 
                 #Add black padding to Img to make the image square
-                imgNormalization = make_square(imgNormalization, min_size=320)
+                imgNormalization, labelResized = make_square(imgNormalization, labelResape,  min_size=320)
 
-                labels.append(labelResape)
+                print("img NAme:", image_path)
+                showOneImg(imgNormalization, labelResized)
+
+                labels.append(labelResized)
                 images.append(imgNormalization)
     showOneImg(images[500])
     

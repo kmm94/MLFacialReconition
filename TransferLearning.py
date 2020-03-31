@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow_core.python.keras.callbacks import ModelCheckpoint, CSVLogger
 
-
+# (width, Heigth)
 IMG_SHAPE = (320, 320, 3)
 
 base_model = tf.keras.applications.inception_v3.InceptionV3(input_shape=IMG_SHAPE, include_top=False, weights="imagenet")
