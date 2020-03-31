@@ -31,22 +31,20 @@ one_label = 0
 
 # show one image with spots
 def showOneImg(image, label=None):
-    #TODO: Color Left, right and nose and check dataset that left rigth and nose are set correctly
     fillTheCircle = -1
-    color = (0, 0, 0)
     radius = 2
     if label is not None:
         coordianates1 = (label[0], label[1])
         img = cv2.circle(image, coordianates1, radius,
-                        color, fillTheCircle)
+                         (0,0,255), fillTheCircle)
 
         coordianates2 = (label[2], label[3])
         img1 = cv2.circle(img, coordianates2, radius,
-                        color, fillTheCircle)
+                        (0,255,0), fillTheCircle)
 
         coordianates3 = (label[4], label[5])
         img2 = cv2.circle(img1, coordianates3, radius,
-                        color, fillTheCircle)
+                          (0,0,0), fillTheCircle)
         print("Image labels: {}".format(label))
     else:
         img2 = image
@@ -57,6 +55,7 @@ def showOneImg(image, label=None):
 
 def up_size(img, labels, scale):
     # times of original size
+    # TODO: investigate X x Y
     width = int(img.shape[1] * scale)
     height = int(img.shape[0] * scale)
     dim = (width, height)
@@ -70,18 +69,23 @@ def up_size(img, labels, scale):
 
 def down_size(img, labels):
     # times of original size
-    width = int(img.shape[1] / 3.375)
-    height = int(img.shape[0] / 6)
+    scallingWidth = img.shape[1]/240
+    scallingHeigth = img.shape[0]/320
+
+    width = int(img.shape[1] / scallingWidth)
+    height = int(img.shape[0] / scallingHeigth)
     dim = (width, height)
     # resize image
     img_resized = cv2.resize(img, dim, interpolation=cv2.INTER_NEAREST)
+    cv2.imshow("test 2 ", img_resized)
+    cv2.waitKey(0)
     labels_resized = []
     index = 0
     for i in labels:
         if (index % 2 == 0):
-            labels_resized.append(int(i / 3.375))
+            labels_resized.append(int(i / scallingWidth))
         else:
-            labels_resized.append(int(i / 6))
+            labels_resized.append(int(i / scallingHeigth))
         index +=1
     return img_resized, labels_resized
 
@@ -180,6 +184,8 @@ def getColorImages():
                 img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
                             int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
                 img = cv2.imread(image_path)
+                cv2.imshow("test ", img)
+                cv2.waitKey(0)
                 imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
                 one_image = imgResape
                 one_label = labelResape
