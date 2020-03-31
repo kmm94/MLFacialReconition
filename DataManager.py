@@ -17,6 +17,9 @@ labels = []
 path_to_image = "FinalDataSet/Images/*.*"
 path_to_labels = "FinalDataSet/FinalDataPoints.csv"
 
+def getImageName(image_path):
+    img_parts = image_path.split(os.path.sep)
+    return img_parts[-1]
 
 def getImageName(image_path):
     img_parts = image_path.split(os.path.sep)
