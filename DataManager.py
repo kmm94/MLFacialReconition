@@ -219,6 +219,7 @@ def getColorImagesAsRect():
                 labels.append(labelResized)
                 images.append(imgNormalization)
     randomIndex = random.randint(0,len(images))
+    print('showing image # ', randomIndex)
     showOneImg(images[randomIndex], labels[randomIndex])
     
     return images, labels
