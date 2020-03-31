@@ -4,6 +4,7 @@ import cv2
 import glob
 import os
 import csv
+import random
 
 
 # HyperPerameters
@@ -16,10 +17,6 @@ images = []
 labels = []
 path_to_image = "FinalDataSet/Images/*.*"
 path_to_labels = "FinalDataSet/FinalDataPoints.csv"
-
-def getImageName(image_path):
-    img_parts = image_path.split(os.path.sep)
-    return img_parts[-1]
 
 def getImageName(image_path):
     img_parts = image_path.split(os.path.sep)
@@ -219,12 +216,10 @@ def getColorImagesAsRect():
                 #Add black padding to Img to make the image square
                 imgNormalization, labelResized = make_square(imgNormalization, labelResape,  min_size=320)
 
-                print("img NAme:", image_path)
-                showOneImg(imgNormalization, labelResized)
-
                 labels.append(labelResized)
                 images.append(imgNormalization)
-    showOneImg(images[500])
+    randomIndex = random.randint(0,len(images))
+    showOneImg(images[randomIndex], labels[randomIndex])
     
     return images, labels
 
