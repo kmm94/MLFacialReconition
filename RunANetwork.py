@@ -172,7 +172,9 @@ def testImgAsRect(modelFilePath):
 
         model = tf.keras.models.load_model(modelFilePath)
         Predictions = model.predict(img_rdy)
+        print("showing img: ", img )
         DataManager.showOneImg(img_squa, Predictions[0])
+        print("End of test")
 
 
 testImgAsRect('./savedModels/RGB_yinguobingCNNV1.h5')
