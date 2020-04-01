@@ -224,3 +224,5 @@ def getColorImagesAsRect():
     
     return images, labels
 
+
+        

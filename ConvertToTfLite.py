@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-modelName = "RGB_InceptionV3"
+modelName = "RGB_yinguobingCNNV1"
 path_To_Model="./savedModels/{}.h5".format(modelName)
 with open(path_To_Model) as f:
     print("Succes")

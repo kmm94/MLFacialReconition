@@ -61,14 +61,14 @@ model.add(tf.keras.layers.Dense(units=6))
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "yinguobingCNN"
-filepath = "checkpoints/checkpoint_yinguobingWideDens_RGB-{epoch:04d}-{val_loss:.2f}.hdf5"
+modelName = "yinguobingCNNV1"
+filepath = "checkpoints/checkpoint_yinguobing_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
                             monitor='val_accuracy',
                             verbose=1,
                             save_best_only=True,
                             mode='auto',
-                             period=50)
+                             period=5)
 
 
 csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
