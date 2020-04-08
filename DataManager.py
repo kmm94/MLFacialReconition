@@ -92,19 +92,32 @@ def reSizeImgAndLabels(img, labels, IMG_Channels):
     else:
         return down_size(img, labels)
 
-def mirrorIMG(image, label):
+def mirrorImgHorizon(image, label):
+    #img.shape returns  (heigth, width, channels)
     fliped_img = cv2.flip(image, 1)
+    imgWidth = fliped_img.shape[1]
     fliped_labels = []
     #right eye
-    fliped_labels.append(int(IMG_HEIGHT - label[0]))
-    fliped_labels.append(int(IMG_WIDTH - label[1]))
+    fliped_labels.append(mirrorXCoordinate(imgWidth, label[0]))
+    fliped_labels.append(label[1])
     #left eye
-    fliped_labels.append(int(IMG_HEIGHT - label[2]))
-    fliped_labels.append(int(IMG_WIDTH - label[3]))
+    fliped_labels.append(mirrorXCoordinate(imgWidth, label[2]))
+    fliped_labels.append(label[3])
     #nose
-    fliped_labels.append(int(IMG_HEIGHT - label[4]))
-    fliped_labels.append(int(IMG_WIDTH - label[5]))
+    fliped_labels.append(mirrorXCoordinate(imgWidth, label[4]))
+    fliped_labels.append(label[5])
     return fliped_img, fliped_labels
+
+def mirrorXCoordinate(imgWidth, x):
+    halfimageSide = imgWidth/2
+    distancToMidt = halfimageSide - x
+    if (distancToMidt == 0):
+        return x
+    elif (distancToMidt >0):
+        return int(halfimageSide + distancToMidt)
+    else:
+        return int(halfimageSide - abs(distancToMidt))
+
 
 def make_square(img, labels, min_size=320):
     color = [0, 0, 0] # 'cause black!
@@ -218,11 +231,20 @@ def getColorImagesAsRect():
 
                 labels.append(labelResized)
                 images.append(imgNormalization)
-    randomIndex = random.randint(0,len(images))
+    randomIndex = random.randint(0,len(images)-1)
     print('showing image # ', randomIndex)
     showOneImg(images[randomIndex], labels[randomIndex])
     
     return images, labels
 
 
-        
+images, labels = getColorImagesAsRect()
+
+one_image = images[300]
+one_label = labels[300]
+
+fliped_img, fliped_Labels = mirrorImgHorizon(one_image, one_label)
+print("normal img")
+showOneImg(one_image, one_label)
+print("fliped")
+showOneImg(fliped_img, fliped_Labels)
