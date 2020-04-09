@@ -5,6 +5,7 @@ import glob
 import os
 import csv
 import random
+import math
 
 
 # HyperPerameters
@@ -261,16 +262,30 @@ def getColorImagesAsRect():
     return images, labels
 
 
+def distToPoint(x, y, centerpoint):
+    return math.sqrt(math.pow(x-centerpoint[0],2) + math.pow(y-centerpoint[1],2))
+
+
+
 def rotateImg(img, labels):
     rotated_labels  = []
 
     #Getting dimensions
-    imgOrgHeigth = img.shape[0]
-    imgOrgWidth = img.shape[1]
+    imgOrgHeigth = img.shape[0] #Y
+    imgOrgWidth = img.shape[1] #X
+    centerPoint = (int(imgOrgWidth/2), int(imgOrgHeigth/2)) #Format (x, y)
 
-    rotated_img = rotateAndScale(img, 0.5, 45)
+    distance_To_LeftEye = distToPoint(labels[0],labels[1],centerPoint)
+    distance_To_RigthEye = distToPoint(labels[2],labels[3],centerPoint)
+    distance_To_Nose = distToPoint(labels[4],labels[5],centerPoint)
+
+    showOneImg(img, [int(imgOrgWidth/2), int(imgOrgHeigth/2),0,0,0,0])
+
+    rotated_img = rotateAndScale(img, 1, 45) #rotated img is allready a squrer so they sould just be down scaled
     rotImgHeigth = rotated_img.shape[0]
-    rotImgHeigth = rotated_img.shape[1]
+    rotImgWidth = rotated_img.shape[1]
+    showOneImg(rotated_img, [int(rotImgWidth/2), int(rotImgHeigth/2),0,0,0,0])
+
 
     return rotated_img, rotated_labels
 
@@ -294,9 +309,9 @@ def rotateImgsTest():
                 img = cv2.imread(image_path)
 
 
-                #imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
+                imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
 
-                img = rotateAndScale(img, 0.5, 45)
+                img, labels = rotateImg(imgResape, labelResape)
 
                 print("rotated img shape: ", str(img.shape))
 
