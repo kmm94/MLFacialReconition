@@ -84,7 +84,7 @@ def down_size(img, labels):
     return img_resized, labels_resized
 
 
-def reSizeImgAndLabels(img, labels, IMG_Channels):
+def  reSizeImgAndLabels(img, labels, IMG_Channels):
     if (img.shape == (120, 160, IMG_Channels)):
         return up_size(img, labels, 2)
     elif img.shape == (240, 320, IMG_Channels):
@@ -93,7 +93,7 @@ def reSizeImgAndLabels(img, labels, IMG_Channels):
         return down_size(img, labels)
 
 def mirrorImgHorizon(image, label):
-    #img.shape returns  (heigth, width, channels)
+    #img.shape returns  (heigth(Y), width(X), channels)
     fliped_img = cv2.flip(image, 1)
     imgWidth = fliped_img.shape[1]
     fliped_labels = []
@@ -118,6 +118,28 @@ def mirrorXCoordinate(imgWidth, x):
     else:
         return int(halfimageSide - abs(distancToMidt))
 
+def rotateAndScale(img, scaleFactor = 0.5, degreesCCW = 30):
+    (oldY,oldX) = img.shape[0], img.shape[1] #note: numpy uses (y,x) convention but most OpenCV functions use (x,y)
+    M = cv2.getRotationMatrix2D(center=(oldX/2,oldY/2), angle=degreesCCW, scale=scaleFactor) #rotate about center of image.
+
+    #choose a new image size.
+    newX,newY = oldX*scaleFactor,oldY*scaleFactor
+
+    #include this if you want to prevent corners being cut off
+    r = np.deg2rad(degreesCCW)
+    newX,newY = (abs(np.sin(r)*newY) + abs(np.cos(r)*newX),abs(np.sin(r)*newX) + abs(np.cos(r)*newY))
+
+    #the warpAffine function call, below, basically works like this:
+    # 1. apply the M transformation on each pixel of the original image
+    # 2. save everything that falls within the upper-left "dsize" portion of the resulting image.
+
+    #So I will find the translation that moves the result to the center of that region.
+    (tx,ty) = ((newX-oldX)/2,(newY-oldY)/2)
+    M[0,2] += tx #third column of matrix holds translation, which takes effect after rotation.
+    M[1,2] += ty
+
+    rotatedImg = cv2.warpAffine(img, M, dsize=(int(newX),int(newY)))
+    return rotatedImg
 
 def make_square(img, labels, min_size=320):
     color = [0, 0, 0] # 'cause black!
@@ -223,8 +245,9 @@ def getColorImagesAsRect():
                 img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
                             int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
                 img = cv2.imread(image_path)
+
                 imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
-                imgNormalization = imgResape / 255.0
+                imgNormalization = img / 255.0
 
                 #Add black padding to Img to make the image square
                 imgNormalization, labelResized = make_square(imgNormalization, labelResape,  min_size=320)
@@ -238,13 +261,65 @@ def getColorImagesAsRect():
     return images, labels
 
 
-images, labels = getColorImagesAsRect()
+def rotateImg(img, labels):
+    rotated_labels  = []
+
+    #Getting dimensions
+    imgOrgHeigth = img.shape[0]
+    imgOrgWidth = img.shape[1]
+
+    rotated_img = rotateAndScale(img, 0.5, 45)
+    rotImgHeigth = rotated_img.shape[0]
+    rotImgHeigth = rotated_img.shape[1]
+
+    return rotated_img, rotated_labels
+
+def rotateImgsTest():
+    print("Image Augementation started")
+    print("Resize, toGray and normalization")
+
+    IMG_Channels = 3
+
+    totalFiles = len(glob.glob(path_to_image))
+    counter = 0
+    for image_path in glob.glob(path_to_image):
+        counter += 1
+        print("[{}/{}]".format(totalFiles, counter))
+        image_name = getImageName(image_path)
+        labels_csv = open(path_to_labels, "r")
+        for row in csv.reader(labels_csv, delimiter=","):
+            if (row[0] == image_name):
+                img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
+                                  int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
+                img = cv2.imread(image_path)
+
+
+                #imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
+
+                img = rotateAndScale(img, 0.5, 45)
+
+                print("rotated img shape: ", str(img.shape))
+
+
+
+                imgNormalization = img / 255.0
+
+                labels.append([0,0,0,0,0,0])
+                images.append(imgNormalization)
+    randomIndex = random.randint(0, len(images) - 1)
+    print('showing image # ', randomIndex)
+    showOneImg(images[300], labels[300])
+
+    return images, labels
+
+images, labels = rotateImgsTest()
 
 one_image = images[300]
 one_label = labels[300]
 
-fliped_img, fliped_Labels = mirrorImgHorizon(one_image, one_label)
+rotated_img = rotateAndScale(one_image, 0.5,30)
+
 print("normal img")
 showOneImg(one_image, one_label)
 print("fliped")
-showOneImg(fliped_img, fliped_Labels)
+showOneImg(rotated_img)
