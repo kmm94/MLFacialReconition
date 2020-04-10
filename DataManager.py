@@ -364,6 +364,7 @@ def rotateImgsTest():
 
                 showOneImg(img, labels)
 
+                #Error with non-squre degrees
                 img, labels = make_square(img, labels, min_size=320)
 
                 showOneImg(img, labels)
