@@ -311,9 +311,9 @@ def rotateROI(x, y, centerPoint, newCenterPoint, degrees):
     return int(newX), int(newY)
 
 
-def rotateImg(img, labels):
+def rotateImg(img, labels, degrees):
     rotated_labels = []
-    degrees_To_Rotate = random.randint(0, 360)
+    degrees_To_Rotate = degrees
 
     # Getting dimensions
     imgOrgHeigth = img.shape[0]  # Y
@@ -332,8 +332,6 @@ def rotateImg(img, labels):
             rotated_labels.append(x)
             rotated_labels.append(y)
         index += 1
-    showOneImg(rotated_img, rotated_labels)
-
     return rotated_img, rotated_labels
 
 
@@ -358,8 +356,18 @@ def rotateImgsTest():
 
                 imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
 
-                img, labels = rotateImg(imgResape, labelResape)
 
+                # use list.copy to copy list and
+                # concatinate list by list+tlist
+                # https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
+                img, labels = rotateImg(imgResape, labelResape, )
+
+                showOneImg(img, labels)
+
+                img, labels = make_square(img, labels, min_size=320)
+
+                showOneImg(img, labels)
+                
                 print("rotated img shape: ", str(img.shape))
 
                 imgNormalization = img / 255.0
