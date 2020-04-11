@@ -335,12 +335,33 @@ def rotateImg(img, labels, degrees):
     return rotated_img, rotated_labels
 
 
-def rotateImgsTest():
+def rotateImgs(images, labels, degrees):
     print("Image Augementation started")
     print("Resize, toGray and normalization")
+    images_copy = images.copy()
+    lables_copy = labels.copy()
 
     IMG_Channels = 3
 
+    totalFiles = len(images)
+    counter = 0
+    rotated_Images = []
+    rotated_Lables= []
+    for img in images_copy:
+        print("[{}/{}]".format(totalFiles, counter))
+        imgResape, labelResape = reSizeImgAndLabels(img, lables_copy[counter], IMG_Channels)
+        img_rotated, labels_rotated = rotateImg(imgResape, labelResape, degrees)
+        img_squre, labels_squre = make_square(img_rotated, labels_rotated, min_size=320)
+        imgNormalization = img_squre / 255.0
+        rotated_Images.append(imgNormalization)
+        rotated_Lables.append(labels_squre)
+        counter += 1
+    randomIndex = random.randint(0, len(rotated_Images) - 1)
+    print('showing image # ', randomIndex)
+    showOneImg(rotated_Images[randomIndex], rotated_Lables[randomIndex])
+    return rotated_Images, rotated_Lables
+
+def getImgsRaw():
     totalFiles = len(glob.glob(path_to_image))
     counter = 0
     for image_path in glob.glob(path_to_image):
@@ -353,43 +374,31 @@ def rotateImgsTest():
                 img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
                                   int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
                 img = cv2.imread(image_path)
-
-                imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
-
-
-                # use list.copy to copy list and
-                # concatinate list by list+tlist
-                # https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
-                img, labels = rotateImg(imgResape, labelResape, )
-
-                showOneImg(img, labels)
-
-                #Error with non-squre degrees
-                img, labels = make_square(img, labels, min_size=320)
-
-                showOneImg(img, labels)
-                
-                print("rotated img shape: ", str(img.shape))
-
-                imgNormalization = img / 255.0
-
-                labels.append([0, 0, 0, 0, 0, 0])
-                images.append(imgNormalization)
-    randomIndex = random.randint(0, len(images) - 1)
-    print('showing image # ', randomIndex)
-    showOneImg(images[300], labels[300])
-
+                labels.append(img_raw_labels)
+                images.append(img)
+    showOneRandomImg(images, labels)
     return images, labels
 
 
-images, labels = rotateImgsTest()
+def showOneRandomImg(images, labels):
+    randomIndex = random.randint(0, len(images) - 1)
+    print('showing image # ', randomIndex)
+    showOneImg(images[randomIndex], labels[randomIndex])
 
-one_image = images[300]
-one_label = labels[300]
 
-rotated_img = rotateAndScale(one_image, 0.5, 30)
+def GetImgsRotated():
+    images, labels = getImgsRaw()
+    rotations = [90,180,270]
+    rotated_imgs = []
+    rotated_labs = []
+    for degrees in rotations:
+        img_to_beRot = images.copy()
+        lab_to_beRot = labels.copy()
+        rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
+        rotated_imgs.extend(rot_img)
+        rotated_labs.extend(rot_lab)
+    return rotated_imgs, rotated_labs
 
-print("normal img")
-showOneImg(one_image, one_label)
-print("fliped")
-showOneImg(rotated_img)
+img, labs = GetImgsRotated()
+
+
