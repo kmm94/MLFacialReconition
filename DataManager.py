@@ -396,7 +396,10 @@ def GetImgsRotatedAndFliped():
         rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
         rotated_imgs.extend(rot_img)
         rotated_labs.extend(rot_lab)
+    rotated_imgs.extend(images)
+    rotated_labs.extend(labels)
 
+    print("flipping Imgs...")
     img_copy = rotated_imgs.copy()
     labs_copy = rotated_labs.copy()
     temp_imgs = []
@@ -412,6 +415,7 @@ def GetImgsRotatedAndFliped():
 
     return rotated_imgs, rotated_labs
 
+#https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
 img, labs = GetImgsRotatedAndFliped()
 showOneRandomImg(img, labs)
 
