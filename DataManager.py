@@ -376,7 +376,6 @@ def getImgsRaw():
                 img = cv2.imread(image_path)
                 labels.append(img_raw_labels)
                 images.append(img)
-    showOneRandomImg(images, labels)
     return images, labels
 
 
@@ -386,7 +385,7 @@ def showOneRandomImg(images, labels):
     showOneImg(images[randomIndex], labels[randomIndex])
 
 
-def GetImgsRotated():
+def GetImgsRotatedAndFliped():
     images, labels = getImgsRaw()
     rotations = [90,180,270]
     rotated_imgs = []
@@ -397,8 +396,23 @@ def GetImgsRotated():
         rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
         rotated_imgs.extend(rot_img)
         rotated_labs.extend(rot_lab)
+
+    img_copy = rotated_imgs.copy()
+    labs_copy = rotated_labs.copy()
+    temp_imgs = []
+    temp_labs = []
+    index = 0
+    for img in img_copy:
+        img_F, labs_F = mirrorImgHorizon(img, labs_copy[index])
+        temp_imgs.append(img_F)
+        temp_labs.append(labs_F)
+        index +=1
+    rotated_imgs.extend(temp_imgs)
+    rotated_labs.extend(temp_labs)
+
     return rotated_imgs, rotated_labs
 
-img, labs = GetImgsRotated()
+img, labs = GetImgsRotatedAndFliped()
+showOneRandomImg(img, labs)
 
 
