@@ -18,7 +18,7 @@ BATCH_SIZE = 1
 # (width, Heigth, #ofChannels)
 IMG_SHAPE = (320, 320, 3)
 
-# Load the data into tf
+# Load the data into tf,
 images = []
 labels = []
 
@@ -26,9 +26,9 @@ one_image = 0
 one_label = 0
 
 
-images, labels = DataManager.getColorImagesAsRect()
+images, labels = DataManager.GetImgsRotatedAndFliped() 
 
-print(images[1].shape)
+
 #showOneImg(one_image, one_label)
 npImgArray = np.array(images)
 npLabelArray = np.array(labels)
@@ -38,7 +38,7 @@ print("imgArray type: " + str(npImgArray.dtype))
 print("LabelArray shape: "+ str(npLabelArray.shape))
 
 if not issubclass(npImgArray.dtype.type, np.float):
-    raise TypeError('float type expected')
+   raise TypeError('float type expected')
 
  # Defining the model:
  # https://github.com/yinguobing/cnn-facial-landmark/blob/master/model.py
@@ -61,8 +61,8 @@ model.add(tf.keras.layers.Dense(units=6))
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "yinguobingCNNV1"
-filepath = "checkpoints/checkpoint_yinguobing_RGB-{epoch:04d}-{val_loss:.2f}.h5"
+modelName = "yinguobingCNNV1TestUdenFlir"
+filepath = "checkpoints/checkpoint_yinguobing_UFlir_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
                             monitor='val_accuracy',
                             verbose=1,
@@ -79,7 +79,7 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(npImgArray, npLabelArray, epochs=1000, validation_split=0.2, callbacks=[checkpoint, logger])
+model.fit(npImgArray, npLabelArray, epochs=500, validation_split=0.2, callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 

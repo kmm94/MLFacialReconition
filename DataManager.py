@@ -51,7 +51,7 @@ def showOneImg(image, label=None):
         img2 = image
     print("Image dimensions: {}".format(image.shape))
     cv2.imshow("TestImage", img2)
-    cv2.waitKey(0)
+    cv2.waitKey(10000)
     cv2.destroyAllWindows()
 
 
@@ -90,6 +90,7 @@ def down_size(img, labels):
 
 
 def reSizeImgAndLabels(img, labels, IMG_Channels):
+
     if (img.shape == (120, 160, IMG_Channels)):
         return up_size(img, labels, 2)
     elif img.shape == (240, 320, IMG_Channels):
@@ -179,7 +180,7 @@ def make_square(img, labels, min_size=320):
     return img_with_border, labels_resized
 
 
-def getGrayImages():
+def GetGrayImages():
     print("Image Augementation started")
     print("Resize, toGray and normalization")
 
@@ -210,7 +211,7 @@ def getGrayImages():
     return images, labels
 
 
-def getColorImages():
+def GetColorImages():
     print("Image Augementation started")
     print("Resize, toGray and normalization")
 
@@ -240,7 +241,7 @@ def getColorImages():
 
 def getColorImagesAsRect():
     print("Image Augementation started")
-    print("Resize, toGray and normalization")
+    print("Resize and normalization")
 
     IMG_Channels = 3
 
@@ -248,7 +249,7 @@ def getColorImagesAsRect():
     counter = 0
     for image_path in glob.glob(path_to_image):
         counter += 1
-        print("[{}/{}]".format(totalFiles, counter))
+        print("[{}/{}] img Retifyed".format(totalFiles, counter))
         image_name = getImageName(image_path)
         labels_csv = open(path_to_labels, "r")
         for row in csv.reader(labels_csv, delimiter=","):
@@ -337,7 +338,7 @@ def rotateImg(img, labels, degrees):
 
 def rotateImgs(images, labels, degrees):
     print("Image Augementation started")
-    print("Resize, toGray and normalization")
+    print("Rotate and normalization")
     images_copy = images.copy()
     lables_copy = labels.copy()
 
@@ -348,7 +349,7 @@ def rotateImgs(images, labels, degrees):
     rotated_Images = []
     rotated_Lables= []
     for img in images_copy:
-        print("[{}/{}]".format(totalFiles, counter))
+        print("[{}/{}] img rotated".format(totalFiles, counter))
         imgResape, labelResape = reSizeImgAndLabels(img, lables_copy[counter], IMG_Channels)
         img_rotated, labels_rotated = rotateImg(imgResape, labelResape, degrees)
         img_squre, labels_squre = make_square(img_rotated, labels_rotated, min_size=320)
@@ -366,7 +367,7 @@ def getImgsRaw():
     counter = 0
     for image_path in glob.glob(path_to_image):
         counter += 1
-        print("[{}/{}]".format(totalFiles, counter))
+        print("[{}/{}] getImg raw".format(totalFiles, counter))
         image_name = getImageName(image_path)
         labels_csv = open(path_to_labels, "r")
         for row in csv.reader(labels_csv, delimiter=","):
@@ -384,20 +385,48 @@ def showOneRandomImg(images, labels):
     print('showing image # ', randomIndex)
     showOneImg(images[randomIndex], labels[randomIndex])
 
+def expand(imgs):
+    expande_Imgs = []
+    for img in imgs:
+        expande_Imgs.append(np.expand_dims(img, axis=0))
+    return expande_Imgs
+        
 
 def GetImgsRotatedAndFliped():
     images, labels = getImgsRaw()
+    counter = 0
+    img_resized = []
+    labels_resized = []
+    for img in images:
+        img, lab = reSizeImgAndLabels(img, labels[counter], 3)
+        img_resized.append(img)
+        labels_resized.append(lab)
+        counter +=1
+
+    images=None
+    labels = None
+    
     rotations = [90,180,270]
     rotated_imgs = []
     rotated_labs = []
     for degrees in rotations:
-        img_to_beRot = images.copy()
-        lab_to_beRot = labels.copy()
+        img_to_beRot = img_resized.copy()
+        lab_to_beRot = labels_resized.copy()
         rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
         rotated_imgs.extend(rot_img)
         rotated_labs.extend(rot_lab)
-    rotated_imgs.extend(images)
-    rotated_labs.extend(labels)
+    
+    counter = 0
+    imgs_rect = []
+    labs_rect = []
+    for img in rotated_imgs:
+        img_squre, labels_squre = make_square(img, rotated_labs[counter])
+        imgs_rect.append(img_squre)
+        labs_rect.append(labels_squre)
+        counter +=1
+    
+    rotated_imgs.extend(imgs_rect)
+    rotated_labs.extend(labs_rect)
 
     print("flipping Imgs...")
     img_copy = rotated_imgs.copy()
@@ -412,11 +441,13 @@ def GetImgsRotatedAndFliped():
         index +=1
     rotated_imgs.extend(temp_imgs)
     rotated_labs.extend(temp_labs)
-
+    #expande_Imgs = expand(rotated_imgs)
+    print("done")
     return rotated_imgs, rotated_labs
 
 #https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
-img, labs = GetImgsRotatedAndFliped()
-showOneRandomImg(img, labs)
+#img, labs = GetImgsRotatedAndFliped()
+#showOneRandomImg(img, labs)
 
 
+ 
