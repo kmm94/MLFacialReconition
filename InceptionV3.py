@@ -26,7 +26,10 @@ global_avg_layer = tf.keras.layers.GlobalAveragePooling2D()(base_model.output)
 print("The new output layer: ", str(global_avg_layer))
 
 #oure trainable layer
-prediction_layer = tf.keras.layers.Dense(units=6)(global_avg_layer)
+dense1 = tf.keras.layers.Dense(1024)(global_avg_layer)
+dense2 = tf.keras.layers.Dense(512)(dense1)
+dense3 = tf.keras.layers.Dense(512)(dense2)
+prediction_layer = tf.keras.layers.Dense(units=6)(dense3)
 
 #combining the network to oure layer
 model = tf.keras.models.Model(inputs=base_model.input, outputs=prediction_layer)
