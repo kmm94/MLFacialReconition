@@ -384,12 +384,18 @@ def showOneRandomImg(images, labels):
     print('showing image # ', randomIndex)
     showOneImg(images[randomIndex], labels[randomIndex])
 
-def expand(imgs):
-    expande_Imgs = []
+def makeListSquare(imgs, labs):
+    print("making img square")
+    imgs_rect = []
+    labs_rect = []
+    counter = 0
     for img in imgs:
-        expande_Imgs.append(np.expand_dims(img, axis=0))
-    return expande_Imgs
-
+        img_squre, labels_squre = make_square(img, labs[counter])
+        imgs_rect.append(img_squre)
+        labs_rect.append(labels_squre)
+        counter += 1
+    print("done...")
+    return imgs_rect, labs_rect
 
 def GetImgsRotatedAndFliped():
     images, labels = getImgsRaw()
@@ -414,35 +420,32 @@ def GetImgsRotatedAndFliped():
         rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
         rotated_imgs.extend(rot_img)
         rotated_labs.extend(rot_lab)
+    img_to_beRot = None
+    lab_to_beRot = None
 
-    counter = 0
-    imgs_rect = []
-    labs_rect = []
-    for img in rotated_imgs:
-        img_squre, labels_squre = make_square(img, rotated_labs[counter])
-        imgs_rect.append(img_squre)
-        labs_rect.append(labels_squre)
-        counter +=1
+    imgs_rect, labs_rect = makeListSquare(rotated_imgs, rotated_labs)
 
-    rotated_imgs.extend(imgs_rect)
-    rotated_labs.extend(labs_rect)
+    org_imgSQ, org_labSQ = makeListSquare(img_resized, labels_resized)
+    imgs_rect.extend(org_imgSQ)
+    labs_rect.extend(org_labSQ)
 
     print("flipping Imgs...")
-    img_copy = rotated_imgs.copy()
-    labs_copy = rotated_labs.copy()
-    temp_imgs = []
-    temp_labs = []
-    index = 0
-    for img in img_copy:
-        img_F, labs_F = mirrorImgHorizon(img, labs_copy[index])
-        temp_imgs.append(img_F)
-        temp_labs.append(labs_F)
-        index +=1
-    rotated_imgs.extend(temp_imgs)
-    rotated_labs.extend(temp_labs)
+    # img_copy = rotated_imgs.copy()
+    # labs_copy = rotated_labs.copy()
+    # temp_imgs = []
+    # temp_labs = []
+    # index = 0
+    # for img in img_copy:
+    #     img_F, labs_F = mirrorImgHorizon(img, labs_copy[index])
+    #     temp_imgs.append(img_F)
+    #     temp_labs.append(labs_F)
+    #     index +=1
+    # rotated_imgs.extend(temp_imgs)
+    # rotated_labs.extend(temp_labs)
     #expande_Imgs = expand(rotated_imgs)
     print("done")
-    return rotated_imgs, rotated_labs
+    return img_resized, labels_resized
+
 
 def SplitDataSet(_images, _labels):
     train_Img = []
@@ -462,6 +465,8 @@ def SplitDataSet(_images, _labels):
     print("shuffling list")
     c = list(zip(_images, _labels))
     random.shuffle(c)
+    _images=None
+    _labels=None
     images, labels = zip(*c)
     print("shuffling Done")
     showOneRandomImg(images, labels)
@@ -469,10 +474,12 @@ def SplitDataSet(_images, _labels):
     number_of_samples = len(images)
     train_spit = number_of_samples*training_Split
     test_Split = number_of_samples*training_Split+test_Split
-    val_Split = number_of_samples
 
-    train_Img, test_Img, validation_Img = np.split(images, [train_spit,test_Split,val_Split])
-    train_Lab, test_Lab, validation_Lab = np.split(labels, [train_spit, test_Split, val_Split])
+    train_Img, test_Img, validation_Img = np.split(images, [int(train_spit), int(test_Split)])
+    train_Lab, test_Lab, validation_Lab = np.split(labels, [int(train_spit), int(test_Split)])
+
+    images=None
+    labels=None
 
     return train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab
 

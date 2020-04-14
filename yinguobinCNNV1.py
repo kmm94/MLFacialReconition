@@ -81,9 +81,12 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(npImgArray, npLabelArray, epochs=500, validation_split=0.2, callbacks=[checkpoint, logger])
+model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
+
+loss,acc = model.evaluate(x= test_Img, y=test_Lab)
+print("Model performance:\n loss: {} \n Accuracy: {}".format(loss,acc))
 
 
 
