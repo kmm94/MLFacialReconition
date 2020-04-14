@@ -415,8 +415,42 @@ def GetImgsRotatedAndFliped():
 
     return rotated_imgs, rotated_labs
 
+def SplitDataSet(_images, _labels):
+    train_Img = []
+    train_Lab = []
+    test_Img = []
+    test_Lab = []
+    validation_Img = []
+    validation_Lab = []
+    training_Split = 0.7
+    test_Split = 0.15
+    val_Split = 0.15
+
+    if ((training_Split + test_Split + val_Split) != 1):
+        raise AssertionError("splits should add up to to 1")
+
+
+    print("shuffling list")
+    c = list(zip(_images, _labels))
+    random.shuffle(c)
+    images, labels = zip(*c)
+    print("shuffling Done")
+    showOneRandomImg(images, labels)
+
+    number_of_samples = len(images)
+    train_spit = number_of_samples*training_Split
+    test_Split = number_of_samples*training_Split+test_Split
+    val_Split = number_of_samples
+
+    train_Img, test_Img, validation_Img = np.split(images, [train_spit,test_Split,val_Split])
+    train_Lab, test_Lab, validation_Lab = np.split(labels, [train_spit, test_Split, val_Split])
+
+    return train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab
+
+
+
 #https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
-img, labs = GetImgsRotatedAndFliped()
-showOneRandomImg(img, labs)
+# img, labs = GetImgsRotatedAndFliped()
+# showOneRandomImg(img, labs)
 
 

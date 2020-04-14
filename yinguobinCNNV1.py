@@ -28,6 +28,8 @@ one_label = 0
 
 images, labels = DataManager.getColorImagesAsRect()
 
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+
 print(images[1].shape)
 #showOneImg(one_image, one_label)
 npImgArray = np.array(images)
