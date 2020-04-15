@@ -20,15 +20,15 @@ base_model.trainable = False
 #define custom last layers of the network
 #seeing the output of the last layer:
 print("Output of the orignal model: ", str(base_model.output))
-global_avg_layer = tf.keras.layers.GlobalAveragePooling2D()(base_model.output)
+global_avg_layer = tf.keras.layers.Flatten()(base_model.output)
 
 #the new output layer
 print("The new output layer: ", str(global_avg_layer))
 
 #oure trainable layer
-dense1 = tf.keras.layers.Dense(1024)(global_avg_layer)
-dense2 = tf.keras.layers.Dense(512)(dense1)
-dense3 = tf.keras.layers.Dense(512)(dense2)
+dense1 = tf.keras.layers.Dense(units=1024, activation="relu")(global_avg_layer)
+dense2 = tf.keras.layers.Dense(units=1024, activation="relu")(dense1)
+dense3 = tf.keras.layers.Dense(units=1024, activation="relu")(dense2)
 prediction_layer = tf.keras.layers.Dense(units=6)(dense3)
 
 #combining the network to oure layer
@@ -41,7 +41,7 @@ model.compile(optimizer="adam", loss="mean_absolute_error", metrics=['accuracy']
 
 
 #Data agumentation
-images, labels = DataManager.getColorImagesAsRect()
+images, labels = DataManager.GetImgsRotatedAndFliped()
 npImgArray = np.array(images)
 npLabelArray = np.array(labels)
 
@@ -53,7 +53,7 @@ checkpoint = ModelCheckpoint(filepath,
                             verbose=1,
                             save_best_only=True,
                             mode='auto',
-                            period=50)
+                            period=5)
 
 
 csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
@@ -62,7 +62,7 @@ logger = CSVLogger(
 )
 
 #training
-model.fit(npImgArray, npLabelArray, epochs=1000, validation_split=0.2, callbacks=[checkpoint, logger])
+model.fit(npImgArray, npLabelArray, batch_size=2 , epochs=500, validation_split=0.2, callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
