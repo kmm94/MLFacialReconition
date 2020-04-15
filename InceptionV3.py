@@ -42,8 +42,7 @@ model.compile(optimizer="adam", loss="mean_absolute_error", metrics=['accuracy']
 
 #Data agumentation
 images, labels = DataManager.GetImgsRotatedAndFliped()
-npImgArray = np.array(images)
-npLabelArray = np.array(labels)
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
 
 modelName = "InceptionV3"
 
@@ -62,7 +61,9 @@ logger = CSVLogger(
 )
 
 #training
-model.fit(npImgArray, npLabelArray, batch_size=2 , epochs=500, validation_split=0.2, callbacks=[checkpoint, logger])
+model.fit(train_Img, train_Lab, batch_size=2 , epochs=10, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
+loss,acc = model.evaluate(x= test_Img, y=test_Lab)
+print("Model performance:\n loss: {} \n Accuracy: {}".format(loss,acc))
