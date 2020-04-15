@@ -18,7 +18,7 @@ BATCH_SIZE = 1
 # (width, Heigth, #ofChannels)
 IMG_SHAPE = (320, 320, 3)
 
-# Load the data into tf,
+# Load the data into tf
 images = []
 labels = []
 
@@ -26,9 +26,11 @@ one_image = 0
 one_label = 0
 
 
-images, labels = DataManager.GetImgsRotatedAndFliped() 
+images, labels = DataManager.GetImgsRotatedAndFliped()
 
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
 
+print(images[1].shape)
 #showOneImg(one_image, one_label)
 npImgArray = np.array(images)
 npLabelArray = np.array(labels)
@@ -79,9 +81,12 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(npImgArray, npLabelArray, epochs=500, validation_split=0.2, callbacks=[checkpoint, logger])
+model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
+
+loss,acc = model.evaluate(x= test_Img, y=test_Lab)
+print("Model performance:\n loss: {} \n Accuracy: {}".format(loss,acc))
 
 
 
