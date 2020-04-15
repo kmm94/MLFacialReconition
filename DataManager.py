@@ -428,6 +428,7 @@ def GetImgsRotatedAndFliped():
     org_imgSQ, org_labSQ = makeListSquare(img_resized, labels_resized)
     imgs_rect.extend(org_imgSQ)
     labs_rect.extend(org_labSQ)
+    showOneRandomImg(imgs_rect,labs_rect)
 
     print("flipping Imgs...")
     # img_copy = rotated_imgs.copy()
@@ -473,7 +474,7 @@ def SplitDataSet(_images, _labels):
 
     number_of_samples = len(images)
     train_spit = number_of_samples*training_Split
-    test_Split = number_of_samples*training_Split+test_Split
+    test_Split = train_spit+ number_of_samples*test_Split
 
     train_Img, test_Img, validation_Img = np.split(images, [int(train_spit), int(test_Split)])
     train_Lab, test_Lab, validation_Lab = np.split(labels, [int(train_spit), int(test_Split)])
