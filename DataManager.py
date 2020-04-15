@@ -240,7 +240,7 @@ def GetColorImages():
 
 def getColorImagesAsRect():
     print("Image Augementation started")
-    print("Resize and normalization")
+    print("Resize")
 
     IMG_Channels = 3
 
@@ -248,7 +248,6 @@ def getColorImagesAsRect():
     counter = 0
     for image_path in glob.glob(path_to_image):
         counter += 1
-        print("[{}/{}] img Retifyed".format(totalFiles, counter))
         image_name = getImageName(image_path)
         labels_csv = open(path_to_labels, "r")
         for row in csv.reader(labels_csv, delimiter=","):
@@ -258,13 +257,13 @@ def getColorImagesAsRect():
                 img = cv2.imread(image_path)
 
                 imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
-                imgNormalization = img / 255.0
 
                 # Add black padding to Img to make the image square
-                imgNormalization, labelResized = make_square(imgNormalization, labelResape, min_size=320)
+                imgNormalization, labelResized = make_square(imgResape, labelResape, min_size=320)
 
                 labels.append(labelResized)
                 images.append(imgNormalization)
+    print("Done... #", totalFiles)
     randomIndex = random.randint(0, len(images) - 1)
     print('showing image # ', randomIndex)
     showOneImg(images[randomIndex], labels[randomIndex])
@@ -337,7 +336,7 @@ def rotateImg(img, labels, degrees):
 
 def rotateImgs(images, labels, degrees):
     print("Image Augementation started")
-    print("Rotate and normalization")
+    print("Rotatetion")
     images_copy = images.copy()
     lables_copy = labels.copy()
 
@@ -348,15 +347,14 @@ def rotateImgs(images, labels, degrees):
     rotated_Images = []
     rotated_Lables= []
     for img in images_copy:
-        print("[{}/{}] img rotated".format(totalFiles, counter))
         imgResape, labelResape = reSizeImgAndLabels(img, lables_copy[counter], IMG_Channels)
         img_rotated, labels_rotated = rotateImg(imgResape, labelResape, degrees)
         img_squre, labels_squre = make_square(img_rotated, labels_rotated, min_size=320)
-        imgNormalization = img_squre / 255.0
-        rotated_Images.append(imgNormalization)
+        rotated_Images.append(img_squre)
         rotated_Lables.append(labels_squre)
         counter += 1
     randomIndex = random.randint(0, len(rotated_Images) - 1)
+    print("Done... #", totalFiles)
     print('showing image # ', randomIndex)
     showOneImg(rotated_Images[randomIndex], rotated_Lables[randomIndex])
     return rotated_Images, rotated_Lables
@@ -364,9 +362,9 @@ def rotateImgs(images, labels, degrees):
 def getImgsRaw():
     totalFiles = len(glob.glob(path_to_image))
     counter = 0
+    print("Getting imgs")
     for image_path in glob.glob(path_to_image):
         counter += 1
-        print("[{}/{}] getImg raw".format(totalFiles, counter))
         image_name = getImageName(image_path)
         labels_csv = open(path_to_labels, "r")
         for row in csv.reader(labels_csv, delimiter=","):
@@ -376,6 +374,7 @@ def getImgsRaw():
                 img = cv2.imread(image_path)
                 labels.append(img_raw_labels)
                 images.append(img)
+    print("Done...")
     return images, labels
 
 
