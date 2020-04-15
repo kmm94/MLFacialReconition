@@ -27,8 +27,10 @@ print("The new output layer: ", str(global_avg_layer))
 
 
 #oure trainable layer
-dense1 = tf.keras.layers.Dense(units=2048, activation="relu")(global_avg_layer)
-prediction_layer = tf.keras.layers.Dense(units=6)(dense1)
+dense1 = tf.keras.layers.Dense(units=1024, activation="relu")(global_avg_layer)
+dense4 = tf.keras.layers.Dense(units=512, activation="relu")(dense1)
+dense5 = tf.keras.layers.Dense(units=512, activation="relu")(dense4)
+prediction_layer = tf.keras.layers.Dense(units=6)(dense5)
 
 #combining the network to oure layer
 model = tf.keras.models.Model(inputs=base_model.input, outputs=prediction_layer)
