@@ -430,6 +430,11 @@ def GetImgsRotatedAndFliped():
     labs_rect.extend(org_labSQ)
     showOneRandomImg(imgs_rect,labs_rect)
 
+    print("normalizing images")
+    for img in imgs_rect:
+        img/255.0
+    print("Done...")
+
     print("flipping Imgs...")
     # img_copy = rotated_imgs.copy()
     # labs_copy = rotated_labs.copy()
@@ -469,7 +474,7 @@ def SplitDataSet(_images, _labels):
     _images=None
     _labels=None
     images, labels = zip(*c)
-    print("shuffling Done")
+    print("shuffling Done...")
     showOneRandomImg(images, labels)
 
     number_of_samples = len(images)

@@ -30,22 +30,17 @@ images, labels = DataManager.GetImgsRotatedAndFliped()
 totalImg = len(images)
 
 train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+print(("showning from training"))
+DataManager.showOneRandomImg(train_Img, train_Lab)
+print("showing from val")
+DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
-#showOneImg(one_image, one_label)
-npImgTrainArray = np.array(train_Img)
-npLabelTrainArray = np.array(train_Lab)
-npImgValArray = np.array(validation_Img)
-npLabelValArray = np.array(validation_Lab)
-npImgTestArray = np.array(test_Img)
-npLabelTestArray = np.array(test_Lab)
-
-
-print("imgArray Shape: " + str(npImgTrainArray.shape))
-print("imgArray type: " + str(npImgTrainArray.dtype))
-print("LabelArray shape: "+ str(npLabelTrainArray.shape))
-print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
-if not issubclass(npImgTrainArray.dtype.type, np.float):
-   raise TypeError('float type expected')
+# print("imgArray Shape: " + str(npImgTrainArray.shape))
+# print("imgArray type: " + str(npImgTrainArray.dtype))
+# print("LabelArray shape: "+ str(npLabelTrainArray.shape))
+# print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
+# if not issubclass(npImgTrainArray.dtype.type, np.float):
+#    raise TypeError('float type expected')
 
  # Defining the model:
  # https://github.com/yinguobing/cnn-facial-landmark/blob/master/model.py
@@ -91,11 +86,11 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(x=npImgTrainArray, y=npLabelTrainArray, epochs=500, validation_data=(npImgValArray, npLabelValArray), callbacks=[checkpoint, logger])
+model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
-loss,acc = model.evaluate(x= npImgTestArray, y=npLabelTestArray)
+loss,acc = model.evaluate(x= test_Img, y=test_Lab)
 print("Model performance:\n loss: {} \n Accuracy: {}".format(loss,acc))
 
 
