@@ -27,19 +27,24 @@ one_label = 0
 
 
 images, labels = DataManager.GetImgsRotatedAndFliped()
+totalImg = len(images)
 
 train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
 
-print(images[1].shape)
 #showOneImg(one_image, one_label)
-npImgArray = np.array(images)
-npLabelArray = np.array(labels)
+npImgTrainArray = np.array(train_Img)
+npLabelTrainArray = np.array(train_Lab)
+npImgValArray = np.array(validation_Img)
+npLabelValArray = np.array(validation_Lab)
+npImgTestArray = np.array(test_Img)
+npLabelTestArray = np.array(test_Lab)
 
-print("imgArray Shape: " + str(npImgArray.shape))
-print("imgArray type: " + str(npImgArray.dtype))
-print("LabelArray shape: "+ str(npLabelArray.shape))
 
-if not issubclass(npImgArray.dtype.type, np.float):
+print("imgArray Shape: " + str(npImgTrainArray.shape))
+print("imgArray type: " + str(npImgTrainArray.dtype))
+print("LabelArray shape: "+ str(npLabelTrainArray.shape))
+print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
+if not issubclass(npImgTrainArray.dtype.type, np.float):
    raise TypeError('float type expected')
 
  # Defining the model:
@@ -56,7 +61,11 @@ model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", act
 model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
 model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
+model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
+model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
+model.add(tf.keras.layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(units=2048, activation='relu'))
 model.add(tf.keras.layers.Dense(units=1024, activation='relu'))
 model.add(tf.keras.layers.Dense(units=6))
 
@@ -70,7 +79,8 @@ checkpoint = ModelCheckpoint(filepath,
                             verbose=1,
                             save_best_only=True,
                             mode='auto',
-                             period=5)
+                            save_weights_only= True,
+                            period=5)
 
 
 csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
@@ -81,11 +91,11 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
+model.fit(x=npImgTrainArray, y=npLabelTrainArray, epochs=500, validation_data=(npImgValArray, npLabelValArray), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
-loss,acc = model.evaluate(x= test_Img, y=test_Lab)
+loss,acc = model.evaluate(x= npImgTestArray, y=npLabelTestArray)
 print("Model performance:\n loss: {} \n Accuracy: {}".format(loss,acc))
 
 
