@@ -430,8 +430,9 @@ def GetImgsRotatedAndFliped():
     showOneRandomImg(imgs_rect,labs_rect)
 
     print("normalizing images")
+    img_normalizied = []
     for img in imgs_rect:
-        img/255.0
+        img_normalizied.append(img/255.0)
     print("Done...")
 
     print("flipping Imgs...")
@@ -449,7 +450,7 @@ def GetImgsRotatedAndFliped():
     # rotated_labs.extend(temp_labs)
     #expande_Imgs = expand(rotated_imgs)
     print("done")
-    return imgs_rect, labs_rect
+    return img_normalizied, labs_rect
 
 
 def SplitDataSet(_images, _labels):
