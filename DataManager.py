@@ -444,7 +444,7 @@ def GetImgsRotatedAndFliped():
     # rotated_labs.extend(temp_labs)
     #expande_Imgs = expand(rotated_imgs)
     print("done")
-    return img_resized, labels_resized
+    return imgs_rect, labs_rect
 
 
 def SplitDataSet(_images, _labels):
