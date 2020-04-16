@@ -62,7 +62,7 @@ model.add(tf.keras.layers.Dense(units=6))
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "CNNv2"
+modelName = "CNNv2_logcosh"
 filepath = "checkpoints/checkpoint_CNNv2_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
                              monitor='val_accuracy',
@@ -79,7 +79,7 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="logcosh", optimizer="adam", metrics=["accuracy"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=1, validation_data=(validation_Img, validation_Lab),
+model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab),
           callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
@@ -93,8 +93,6 @@ test_Img_0 = np.expand_dims(test_Img_0, axis=0)
 Predictions = model.predict(test_Img_0)
 DataManager.showOneImg(test_Img[0], Predictions[0])
 
-print("showing different loss functions")
-NetworkHelper.Evaluate(test_Lab[0],Predictions[0])
 
 
 

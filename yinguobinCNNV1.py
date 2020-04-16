@@ -67,8 +67,8 @@ model.add(tf.keras.layers.Dense(units=6))
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "yinguobingCNNV1TestUdenFlir"
-filepath = "checkpoints/checkpoint_yinguobing_UFlir_RGB-{epoch:04d}-{val_loss:.2f}.h5"
+modelName = "yinguobingCNNV1_logcosh"
+filepath = "checkpoints/checkpoint_yinguobing_logcosh_UFlir_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
                             monitor='val_accuracy',
                             verbose=1,
@@ -84,7 +84,7 @@ logger = tf.keras.callbacks.CSVLogger(
 )
  
 
-model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="logcosh", optimizer="adam", metrics=["accuracy"])
 
 model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
 
