@@ -11,6 +11,8 @@ import NetworkHelper
 import DataManager
 from tensorflow_core.python.keras.callbacks import ModelCheckpoint
 
+import Unet
+
 print("TensorFlow version: {}".format(tf.__version__))
 print("Eager execution: {}".format(tf.executing_eagerly()))
 
@@ -39,31 +41,13 @@ DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
 DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
-# print("imgArray Shape: " + str(npImgTrainArray.shape))
-# print("imgArray type: " + str(npImgTrainArray.dtype))
-# print("LabelArray shape: "+ str(npLabelTrainArray.shape))
-#
-# if not issubclass(npImgTrainArray.dtype.type, np.float):
-#    raise TypeError('float type expected')
-
-# Defining the model:
-# https://github.com/yinguobing/cnn-facial-landmark/blob/master/model.py
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding="same", activation="relu", input_shape=IMG_SHAPE))
-model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
-model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(units=256, activation='relu'))
-model.add(tf.keras.layers.Dense(units=6))
+model = Unet.unet()
 
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "CNNv2_logcosh"
-filepath = "checkpoints/checkpoint_CNNv2_RGB-{epoch:04d}-{val_loss:.2f}.h5"
+modelName = "Unet"
+filepath = "checkpoints/checkpoint_Unet_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
                              monitor='val_accuracy',
                              verbose=1,
@@ -77,7 +61,7 @@ logger = tf.keras.callbacks.CSVLogger(
     csv_fileName, separator=',', append=False
 )
 
-model.compile(loss="logcosh", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
 
 model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab),
           callbacks=[checkpoint, logger])
