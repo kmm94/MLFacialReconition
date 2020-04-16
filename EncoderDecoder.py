@@ -7,6 +7,8 @@ import csv
 import os
 import glob
 import cv2
+from tensorflow_core.python.keras.layers import Conv2D, MaxPool2D, Dropout, UpSampling2D, Concatenate
+
 import DataManager
 from tensorflow_core.python.keras.callbacks import ModelCheckpoint
 
@@ -32,31 +34,38 @@ DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
  # Defining the model:
  # inspiration Unet
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu", input_shape=IMG_SHAPE))
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
-model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
-model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Dropout(0.5))
-model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
-model.add(tf.keras.layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Conv2D(filters=512, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Dropout(0.5))
-model.add(tf.keras.layers.UpSampling2D(2,2))
-model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding="same", activation="relu"))
-model.add(tf.keras.layers.Concatenate())
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(units=1024, activation='relu'))
-model.add(tf.keras.layers.Dense(units=6))
+
+inputLayer = tf.keras.layers.Input(IMG_SHAPE)
+dconv1 = Conv2D(filters=64, kernel_size=3, padding="same", activation="relu")(inputLayer)
+maxPool1 = MaxPool2D(pool_size=2, strides=2, padding="valid")(dconv1)
+dconv2 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(maxPool1)
+dconv2 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(dconv2)
+maxpool2 = MaxPool2D(pool_size=2, strides=2, padding="valid")(dconv2)
+dconv3 = Conv2D(filters=256, kernel_size=3, padding="same", activation="relu")(maxpool2)
+dconv3 = Conv2D(filters=256, kernel_size=3, padding="same", activation="relu")(dconv3)
+dropout1 = Dropout(0.5)(dconv3)
+maxPool3 = MaxPool2D(pool_size=2, strides=2, padding="valid")(dropout1)
+dconv4 = Conv2D(filters=512, kernel_size=3, padding="same", activation="relu")(maxPool3)
+dconv4 = Conv2D(filters=512, kernel_size=3, padding="same", activation="relu")(dconv4)
+dropout2 = Dropout(0.5)(dconv4)
+upsam1 = UpSampling2D((2,2))(dropout2)
+uconv1 = Conv2D(filters=256, kernel_size=3, padding="same", activation="relu")(upsam1)
+conca1 = Concatenate(axis=3)([dconv3, uconv1])
+uconv2 = Conv2D(filters=256, kernel_size=3, padding="same", activation="relu")(conca1)
+upsam2 = UpSampling2D((2,2))(uconv2)
+uconv3 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(uconv2)
+conca2 = Concatenate(axis=3)([dconv2, dconv2])
+uconv4 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(conca2)
+flatting = tf.keras.layers.Flatten()(uconv4)
+dense1 = tf.keras.layers.Dense(units=1024, activation='relu')(flatting)
+output = tf.keras.layers.Dense(units=6)(dense1)
+
+model = tf.keras.models.Model(inputs=inputLayer, output=output)
 
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "yinguobingWideDens"
+modelName = "EncoderDecoder"
 filepath = "checkpoints/checkpoint_yinguobingWideDens_RGB-{epoch:04d}-{val_loss:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath,
                             monitor='val_accuracy',
