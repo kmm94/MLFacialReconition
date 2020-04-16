@@ -26,7 +26,7 @@ one_image = 0
 one_label = 0
 
 
-images, labels = DataManager.GetImgsRotatedAndFliped()
+images, labels = DataManager.GetImgsRotatedAndFliped([90,180,270])
 totalImg = len(images)
 
 train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
@@ -67,7 +67,7 @@ model.add(tf.keras.layers.Dense(units=6))
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "yinguobingCNNV1_logcosh"
+modelName = "yinguobingCNNV1_mean_squared_error"
 filepath = "checkpoints/checkpoint_yinguobing_logcosh_UFlir_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
                             monitor='val_accuracy',
