@@ -56,7 +56,7 @@ model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", acti
 model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
 model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(units=128, activation='relu'))
+model.add(tf.keras.layers.Dense(units=256, activation='relu'))
 model.add(tf.keras.layers.Dense(units=6))
 
 model.summary()
@@ -79,7 +79,7 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="logcosh", optimizer="adam", metrics=["accuracy"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=1, validation_data=(validation_Img, validation_Lab),
+model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab),
           callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
@@ -93,8 +93,6 @@ test_Img_0 = np.expand_dims(test_Img_0, axis=0)
 Predictions = model.predict(test_Img_0)
 DataManager.showOneImg(test_Img[0], Predictions[0])
 
-print("showing different loss functions")
-NetworkHelper.Evaluate(test_Lab[0],Predictions[0])
 
 
 

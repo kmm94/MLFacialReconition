@@ -13,38 +13,27 @@ from tensorflow_core.python.keras.callbacks import ModelCheckpoint
 print("TensorFlow version: {}".format(tf.__version__))
 print("Eager execution: {}".format(tf.executing_eagerly()))
 
-# HyperPerameters
-BATCH_SIZE = 1
-IMG_HEIGHT = int(480/2)
-IMG_WIDTH = int(640/2)
-IMG_Channels = 3
+# (width, Heigth, #ofChannels)
+IMG_SHAPE = (320, 320, 3)
 
 # Load the data into tf
-images = []
-labels = []
+images, labels = DataManager.GetImgsRotatedAndFliped()
+totalImg = len(images)
 
-one_image = 0
-one_label = 0
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
 
 
-images, labels = DataManager.getColorImages()
-
-print(images[1].shape)
-#showOneImg(one_image, one_label)
-npImgArray = np.array(images)
-npLabelArray = np.array(labels)
-
-print("imgArray Shape: " + str(npImgArray.shape))
-print("imgArray type: " + str(npImgArray.dtype))
-print("LabelArray shape: "+ str(npLabelArray.shape))
-
-if not issubclass(npImgArray.dtype.type, np.float):
-    raise TypeError('float type expected')
+print("**** startinmg *****")
+print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
+print(("showning from training"))
+DataManager.showOneRandomImg(train_Img, train_Lab)
+print("showing from val")
+DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
  # Defining the model:
  # https://github.com/yinguobing/cnn-facial-landmark/blob/master/model.py
 model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding="same", activation="relu", input_shape=(IMG_HEIGHT, IMG_WIDTH, IMG_Channels)))
+model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding="same", activation="relu", input_shape=IMG_SHAPE))
 model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
 model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding="same", activation="relu"))
 model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2, padding="valid"))
@@ -78,11 +67,15 @@ logger = tf.keras.callbacks.CSVLogger(
 )
  
 
-model.compile(loss="mean_absolute_error", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(npImgArray, npLabelArray, epochs=1000, validation_split=0.2, callbacks=[checkpoint, logger])
+model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab),
+          callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
+
+loss, acc = model.evaluate(x=test_Img, y=test_Lab)
+print("Model performance:\n loss: {} \n Accuracy: {}".format(loss, acc))
 
 
 

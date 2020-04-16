@@ -435,9 +435,9 @@ def GetImgsRotatedAndFliped():
         img_normalizied.append(img/255.0)
     print("Done...")
 
-    print("flipping Imgs...")
-    # img_copy = rotated_imgs.copy()
-    # labs_copy = rotated_labs.copy()
+    # print("flipping Imgs...")
+    # img_copy = img_normalizied.copy()
+    # labs_copy = labs_rect.copy()
     # temp_imgs = []
     # temp_labs = []
     # index = 0
@@ -446,10 +446,10 @@ def GetImgsRotatedAndFliped():
     #     temp_imgs.append(img_F)
     #     temp_labs.append(labs_F)
     #     index +=1
-    # rotated_imgs.extend(temp_imgs)
-    # rotated_labs.extend(temp_labs)
-    #expande_Imgs = expand(rotated_imgs)
-    print("done")
+    # img_normalizied.extend(temp_imgs)
+    # labs_rect.extend(temp_labs)
+    # print("done")
+
     return img_normalizied, labs_rect
 
 
