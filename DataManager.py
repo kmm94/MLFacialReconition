@@ -396,7 +396,7 @@ def makeListSquare(imgs, labs):
     print("done...")
     return imgs_rect, labs_rect
 
-def GetImgsRotatedAndFliped():
+def GetImgsRotatedAndFliped(_rotations):
     images, labels = getImgsRaw()
     counter = 0
     img_resized = []
@@ -410,7 +410,7 @@ def GetImgsRotatedAndFliped():
     images=None
     labels = None
 
-    rotations = [90,180,270]
+    rotations = _rotations
     rotated_imgs = []
     rotated_labs = []
     for degrees in rotations:
