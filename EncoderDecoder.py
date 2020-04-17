@@ -19,7 +19,7 @@ print("Eager execution: {}".format(tf.executing_eagerly()))
 IMG_SHAPE = (320, 320, 3)
 
 # Load the data into tf
-images, labels = DataManager.GetImgsRotatedAndFliped([90,180])
+images, labels = DataManager.GetImgsRotatedAndFliped([90,180,270])
 totalImg = len(images)
 
 train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
@@ -83,7 +83,7 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=500, batch_size=1, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
+model.fit(x=train_Img, y=train_Lab, epochs=300, batch_size=1, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
