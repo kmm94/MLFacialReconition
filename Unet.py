@@ -11,17 +11,21 @@ def get_unet(input_Shape):
     conv1 = Conv2D(32, (3, 3), padding="same", name="conv1_1", activation="relu", data_format="channels_last")(inputs)
     conv1 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(conv1)
+
     conv2 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool1)
     conv2 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv2)
-    pool2 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(conv2)
+    Drop1 = Dropout(0.5)(conv2)
+    pool2 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(Drop1)
 
     conv3 = Conv2D(128, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool2)
     conv3 = Conv2D(128, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv3)
-    pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
+    Drop2 = Dropout(0.5)(conv3)
+    pool3 = MaxPooling2D(pool_size=(2, 2))(Drop2)
 
     conv4 = Conv2D(256, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool3)
     conv4 = Conv2D(256, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv4)
-    pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
+    Drop3 = Dropout(0.5)(conv4)
+    pool4 = MaxPooling2D(pool_size=(2, 2))(Drop3)
 
     conv5 = Conv2D(512, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool4)
     conv5 = Conv2D(512, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv5)
@@ -45,15 +49,12 @@ def get_unet(input_Shape):
     up9 = concatenate([up_conv8, conv1], axis=3)
     conv9 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(up9)
     conv9 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv9)
-
-    # ch, cw = get_crop_shape(inputs, conv9)
-    # conv9  = ZeroPadding2D(padding=(ch[0],cw[0]), data_format="channels_last")(conv9)
-    # conv10 = Conv2D(1, (1, 1), data_format="channels_last", activation="sigmoid")(conv9)
+    #conv10 = Conv2D(2, (1, 1), activation="relu")(conv9)
 
     flatten = Flatten()(conv9)
-    Dense1 = Dense(512, activation='relu')(flatten)
+    Dense1 = Dense(64, activation='relu')(flatten)
     Dense2 = Dense(6)(Dense1)
 
-    model = Model(input=inputs, output=Dense2)
+    model = Model(inputs, Dense2)
 
     return model

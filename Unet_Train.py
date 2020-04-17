@@ -28,7 +28,7 @@ labels = []
 one_image = 0
 one_label = 0
 
-images, labels = DataManager.GetImgsRotatedAndFliped([90])
+images, labels = DataManager.GetImgsRotatedAndFliped([90, 180, 270 ])
 totalImg = len(images)
 
 train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
@@ -41,7 +41,7 @@ DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
 DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
-model = Unet.unet()
+model = Unet.get_unet(IMG_SHAPE)
 
 model.summary()
 
@@ -63,7 +63,7 @@ logger = tf.keras.callbacks.CSVLogger(
 
 model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=500, validation_data=(validation_Img, validation_Lab),
+model.fit(x=train_Img, y=train_Lab, batch_size=1, epochs=500, validation_data=(validation_Img, validation_Lab),
           callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
