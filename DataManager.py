@@ -460,9 +460,9 @@ def SplitDataSet(_images, _labels):
     test_Lab = []
     validation_Img = []
     validation_Lab = []
-    training_Split = 0.7
-    test_Split = 0.15
-    val_Split = 0.15
+    training_Split = 0.6
+    test_Split = 0.20
+    val_Split = 0.20
 
     if ((training_Split + test_Split + val_Split) != 1):
         raise AssertionError("splits should add up to to 1")
