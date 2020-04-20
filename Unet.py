@@ -10,7 +10,8 @@ def get_unet(input_Shape):
 
     conv1 = Conv2D(32, (3, 3), padding="same", name="conv1_1", activation="relu", data_format="channels_last")(inputs)
     conv1 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv1)
-    pool1 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(conv1)
+    Drop0 = Dropout(0.5)(conv1)
+    pool1 = MaxPooling2D(pool_size=(2, 2), data_format="channels_last")(Drop0)
 
     conv2 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(pool1)
     conv2 = Conv2D(64, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv2)
@@ -49,12 +50,14 @@ def get_unet(input_Shape):
     up9 = concatenate([up_conv8, conv1], axis=3)
     conv9 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(up9)
     conv9 = Conv2D(32, (3, 3), padding="same", activation="relu", data_format="channels_last")(conv9)
-    #conv10 = Conv2D(2, (1, 1), activation="relu")(conv9)
+    #up_conv9 = UpSampling2D(size=(2, 2))(conv9)
+    #conv10 = Conv2D(16, (3, 3), activation="relu", padding="same")(up_conv9)
 
     flatten = Flatten()(conv9)
     Dense1 = Dense(64, activation='relu')(flatten)
-    Dense2 = Dense(6)(Dense1)
+    Dense2 = Dense(64, activation='relu')(Dense1)
+    Dense3 = Dense(6)(Dense2)
 
-    model = Model(inputs, Dense2)
+    model = Model(inputs, Dense3)
 
     return model
