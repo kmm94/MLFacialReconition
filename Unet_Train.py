@@ -41,7 +41,7 @@ DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
 DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
-model = Unet.get_unet(IMG_SHAPE)
+model = Unet.unet2(IMG_SHAPE)
 
 model.summary()
 
