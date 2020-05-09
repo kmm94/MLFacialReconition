@@ -35,11 +35,11 @@ model = tf.keras.models.Model(inputs=base_model.input, outputs=prediction_layer)
 model.summary()
 
 #compiling the model
-model.compile(optimizer="adam", loss="huber_loss", metrics=['accuracy'])
+model.compile(optimizer="adam", loss="mean_squared_error", metrics=['precision'])
 
 
 #Data agumentation
-images, labels = DataManager.GetImgsRotatedAndFliped()
+images, labels = DataManager.GetImgsRotatedAndFliped([90, 180, 270])
 totalImg = len(images)
 train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
 
@@ -53,7 +53,7 @@ modelName = "InceptionV3"
 
 filepath = "checkpoints/checkpoint_InceptionV3_RGB-{epoch:04d}-{val_loss:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath,
-                            monitor='val_accuracy',
+                            monitor='precision',
                             verbose=1,
                             save_best_only=True,
                             mode='auto',

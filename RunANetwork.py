@@ -58,7 +58,7 @@ def reSizeImg(img, IMG_Channels):
         return down_size(img)
 
 def testImgAsRect(modelFilePath):
-    path_to_image = "./FinalDataSet/Images/*.BMT"
+    path_to_image = "./FinalDataSet/uSet/*.jpg"
     resizedImgs = []
     counter =0
     totalFiles = len(glob.glob(path_to_image))
@@ -80,5 +80,5 @@ def testImgAsRect(modelFilePath):
         print("End of test")
 
 
-testImgAsRect('./savedModels/RGB_yinguobingCNNV1TestUdenFlir.h5')
+testImgAsRect('./savedModels/RGB_CNNv2_logcosh.h5')
 #test_model()

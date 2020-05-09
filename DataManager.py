@@ -398,6 +398,7 @@ def makeListSquare(imgs, labs):
 
 def GetImgsRotatedAndFliped(_rotations):
     images, labels = getImgsRaw()
+    print("Raw images loaded: ", len(images))
     counter = 0
     img_resized = []
     labels_resized = []
@@ -409,7 +410,7 @@ def GetImgsRotatedAndFliped(_rotations):
 
     images=None
     labels = None
-
+    print("number of reSizedImgs: ", len(img_resized))
     rotations = _rotations
     rotated_imgs = []
     rotated_labs = []
@@ -417,11 +418,12 @@ def GetImgsRotatedAndFliped(_rotations):
         img_to_beRot = img_resized.copy()
         lab_to_beRot = labels_resized.copy()
         rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
+        print("adding imgs that have been rotated {} Imgs#: {}".format(degrees, len(rot_img)))
         rotated_imgs.extend(rot_img)
         rotated_labs.extend(rot_lab)
     img_to_beRot = None
     lab_to_beRot = None
-
+    print("done...")
     imgs_rect, labs_rect = makeListSquare(rotated_imgs, rotated_labs)
 
     org_imgSQ, org_labSQ = makeListSquare(img_resized, labels_resized)
@@ -429,7 +431,7 @@ def GetImgsRotatedAndFliped(_rotations):
     labs_rect.extend(org_labSQ)
     showOneRandomImg(imgs_rect,labs_rect)
 
-    print("normalizing images")
+    print("normalizing {} images".format(len(imgs_rect)))
     img_normalizied = []
     for img in imgs_rect:
         img_normalizied.append(img/255.0)

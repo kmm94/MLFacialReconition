@@ -47,18 +47,8 @@ maxpo2 = MaxPool2D(pool_size=2, strides=2)(dconv2a)
 
 dconv3 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(maxpo2)
 dconv3a = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(dconv3)
-maxPo3 = MaxPool2D(pool_size=2, strides=2)(dconv3a)
 
-dconv4 = Conv2D(filters=256, kernel_size=3, padding="same", activation="relu")(maxPo3)
-dconv4 = Conv2D(filters=256, kernel_size=3, padding="same", activation="relu")(dconv4)
-
-upsam1 = UpSampling2D((2, 2))(dconv4)
-uconv1 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(upsam1)
-conca1 = Concatenate(axis=3)([dconv3a, uconv1])
-uconv2 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(conca1)
-uconv2 = Conv2D(filters=128, kernel_size=3, padding="same", activation="relu")(uconv2)
-
-upsam2 = UpSampling2D((2, 2))(uconv2)
+upsam2 = UpSampling2D((2, 2))(dconv3a)
 uconv3 = Conv2D(filters=64, kernel_size=3, padding="same", activation="relu")(upsam2)
 conca2 = Concatenate(axis=3)([dconv2a, uconv3])
 uconv4 = Conv2D(filters=64, kernel_size=3, padding="same", activation="relu")(conca2)
