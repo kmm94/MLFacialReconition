@@ -2,7 +2,7 @@
 /venv/
 /FinalDataSet/
 /TfLiteModels/*.tflite
-/savedModels/*.h5
+*.h5
 /logs/*.csv
 /checkpoints/
 __pycache__/
