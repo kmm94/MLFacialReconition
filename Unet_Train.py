@@ -28,20 +28,17 @@ labels = []
 one_image = 0
 one_label = 0
 
-images, labels = DataManager.GetImgsRotatedAndFliped([90, 180, 270 ])
-totalImg = len(images)
-
-train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.GetMarcinDataset()
 
 
 print("**** startinmg *****")
-print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
+print("TrainSet size: {} \nValidationSet size: {} \nTestSet size: {}".format(len(train_Img), len(validation_Img), len(test_Img)))
 print(("showning from training"))
 DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
 DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
-model = Unet.unet2(IMG_SHAPE)
+model = Unet.get_unet(IMG_SHAPE)
 
 model.summary()
 
@@ -49,26 +46,26 @@ model.summary()
 modelName = "Unet"
 filepath = "checkpoints/checkpoint_Unet_RGB-{epoch:04d}-{val_loss:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
-                             monitor='val_accuracy',
+                             monitor='val_mean_absolute_error',
                              verbose=1,
                              save_best_only=True,
                              mode='auto',
                              save_weights_only=True,
-                             period=5)
+                             period=1)
 
 csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
 logger = tf.keras.callbacks.CSVLogger(
     csv_fileName, separator=',', append=False
 )
 
-model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="mean_squared_error", optimizer="adam", metrics=["mean_absolute_error"])
 
-model.fit(x=train_Img, y=train_Lab, batch_size=1, epochs=500, validation_data=(validation_Img, validation_Lab),
+model.fit(x=np.array(train_Img), y=np.array(train_Lab), batch_size=1, epochs=50, validation_data=(np.array(validation_Img), np.array(validation_Lab)),
           callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
-loss, acc = model.evaluate(x=test_Img, y=test_Lab)
+loss, acc = model.evaluate(x=np.array(test_Img), y=np.array(test_Lab))
 print("Model performance:\n loss: {} \n Accuracy: {}".format(loss, acc))
 
 test_Img_0 = test_Img[0]

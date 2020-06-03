@@ -26,8 +26,13 @@ global_avg_layer = tf.keras.layers.Flatten()(base_model.output)
 print("The new output layer: ", str(global_avg_layer))
 
 #oure trainable layer
-dense1 = tf.keras.layers.Dense(units=1024, activation="relu")(global_avg_layer)
-prediction_layer = tf.keras.layers.Dense(units=6)(dense1)
+dense1 = tf.keras.layers.Dense(units=512, activation="relu")(global_avg_layer)
+dense2 = tf.keras.layers.Dense(units=256, activation="relu")(dense1)
+dense3 = tf.keras.layers.Dense(units=256, activation="relu")(dense2)
+dense4 = tf.keras.layers.Dense(units=256, activation="relu")(dense3)
+dense5 = tf.keras.layers.Dense(units=256, activation="relu")(dense4)
+dense6 = tf.keras.layers.Dense(units=256, activation="relu")(dense5)
+prediction_layer = tf.keras.layers.Dense(units=6)(dense6)
 
 #combining the network to oure layer
 model = tf.keras.models.Model(inputs=base_model.input, outputs=prediction_layer)
@@ -35,29 +40,26 @@ model = tf.keras.models.Model(inputs=base_model.input, outputs=prediction_layer)
 model.summary()
 
 #compiling the model
-model.compile(optimizer="adam", loss="mean_squared_error", metrics=['precision'])
+model.compile(optimizer="adam", loss="mean_squared_error", metrics=['mean_absolute_error'])
 
 
 #Data agumentation
-images, labels = DataManager.GetImgsRotatedAndFliped([90, 180, 270])
-totalImg = len(images)
-train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.GetMarcinDataset()
 
-print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
 print(("showning from training"))
 DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
 DataManager.showOneRandomImg(validation_Img, validation_Lab)
 
-modelName = "InceptionV3"
+modelName = "InceptionV3_seperateSplit"
 
-filepath = "checkpoints/checkpoint_InceptionV3_RGB-{epoch:04d}-{val_loss:.2f}.hdf5"
+filepath = "checkpoints/ckpt_InceptionV3__seperateSplit-{epoch:04d}--loss-{val_loss:.2f}-Metric-{val_mean_absolute_error:.3f}.hdf5"
 checkpoint = ModelCheckpoint(filepath,
-                            monitor='precision',
+                            monitor='mean_absolute_error',
                             verbose=1,
                             save_best_only=True,
                             mode='auto',
-                            period=5)
+                            period=1)
 
 
 csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
@@ -66,7 +68,7 @@ logger = CSVLogger(
 )
 
 #training
-model.fit(train_Img, train_Lab, batch_size=32 , epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
+model.fit(np.array(train_Img), np.array(train_Lab), batch_size=32 , epochs=100, validation_data=(np.array(validation_Img), np.array(validation_Lab)), callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 

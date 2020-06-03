@@ -4,9 +4,10 @@ import glob
 import DataManager
 
 
-
-images, labels = DataManager.getColorImagesAsRect()
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.getMarcinDataset()
 i = 0
-for img in images:
-   DataManager.showOneImg(img, labels[i])
+print("Total Img: ", len(train_Img))
+for img in train_Img:
+   DataManager.showOneImg(img, train_Lab[i])
+   print("# ", i)
    i += 1

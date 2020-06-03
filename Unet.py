@@ -108,7 +108,7 @@ def unet2(input_size):
     conv9 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge9)
     conv9 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
 
-    #conv9 = Conv2D(4, 2, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
+    conv9 = Conv2D(4, 2, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
     flatten = Flatten()(conv9)
     Dense1 = Dense(64, activation='relu')(flatten)
     output = Dense(6)(Dense1)

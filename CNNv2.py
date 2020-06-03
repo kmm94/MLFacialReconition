@@ -20,20 +20,10 @@ BATCH_SIZE = 1
 IMG_SHAPE = (320, 320, 3)
 
 # Load the data into tf
-images = []
-labels = []
-
-one_image = 0
-one_label = 0
-
-images, labels = DataManager.GetImgsRotatedAndFliped([90, 180, 270])
-totalImg = len(images)
-
-train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.GetMarcinDataset()
 
 
 print("**** starting *****")
-print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
 print(("showning from training"))
 DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
@@ -63,13 +53,11 @@ model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
 modelName = "CNNv2_logcosh"
-filepath = "checkpoints/chpt_CNNv2_RGB-{epoch:04d}-loss-{val_loss:.2f}-Metric-{val_logcosh:.1f}.h5"
+filepath = "checkpoints/chpt_CNNv2_RGB-{epoch:04d}-loss-{val_loss:.2f}-Metric-{val_mean_absolute_error:.1f}.h5"
 checkpoint = ModelCheckpoint(filepath,
-                             monitor='val_logcosh',
+                             monitor='val_mean_absolute_error',
                              verbose=1,
-                             save_best_only=True,
                              mode='auto',
-                             save_weights_only=True,
                              period=1)
 
 csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
@@ -77,14 +65,14 @@ logger = tf.keras.callbacks.CSVLogger(
     csv_fileName, separator=',', append=False
 )
 
-model.compile(loss="mean_squared_error", optimizer="adam", metrics=["logcosh"])
+model.compile(loss="mean_squared_error", optimizer="adam", metrics=["mean_absolute_error"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=50, validation_data=(validation_Img, validation_Lab),
+model.fit(x=np.array(train_Img), y=np.array(train_Lab), epochs=100, validation_data=(np.array(validation_Img), np.array(validation_Lab)),
           callbacks=[checkpoint, logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
-loss, acc = model.evaluate(x=test_Img, y=test_Lab)
+loss, acc = model.evaluate(x=np.array(test_Img), y=np.array(test_Lab))
 print("Model performance:\n loss: {} \n Accuracy: {}".format(loss, acc))
 
 test_Img_0 = test_Img[0]

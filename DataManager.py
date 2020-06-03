@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 import cv2
 import glob
 import os
@@ -12,21 +11,9 @@ BATCH_SIZE = 1
 IMG_HEIGHT = int(480 / 2)
 IMG_WIDTH = int(640 / 2)
 
-# Load the data into tf
-images = []
-labels = []
-path_to_image = "FinalDataSet/Images/*.*"
-path_to_labels = "FinalDataSet/FinalDataPoints.csv"
-
-
 def getImageName(image_path):
     img_parts = image_path.split(os.path.sep)
     return img_parts[-1]
-
-
-index = 0
-one_image = 0
-one_label = 0
 
 
 # show one image with spots
@@ -70,12 +57,13 @@ def up_size(img, labels, scale):
 
 def down_size(img, labels):
     # times of original size
-    scallingWidth = img.shape[1] / 240
-    scallingHeigth = img.shape[0] / 320
+    scallingWidth = img.shape[1] / 240 
+    scallingHeigth = img.shape[0] / 320 
 
     width = int(img.shape[1] / scallingWidth)
     height = int(img.shape[0] / scallingHeigth)
     dim = (width, height)
+
     # resize image
     img_resized = cv2.resize(img, dim, interpolation=cv2.INTER_NEAREST)
     labels_resized = []
@@ -88,12 +76,34 @@ def down_size(img, labels):
         index += 1
     return img_resized, labels_resized
 
+def down_sizeMarcin(img, labels):
+    # times of original size
+    scallingWidth = img.shape[1] / 320 #changed for marcin
+    scallingHeigth = img.shape[0] / 240 #changed for marcin
+
+    width = int(img.shape[1] / scallingWidth)
+    height = int(img.shape[0] / scallingHeigth)
+    dim = (width, height)
+
+    # resize image
+    img_resized = cv2.resize(img, dim, interpolation=cv2.INTER_NEAREST)
+    labels_resized = []
+    index = 0
+    for i in labels:
+        if (index % 2 == 0):
+            labels_resized.append(int(i / scallingWidth))
+        else:
+            labels_resized.append(int(i / scallingHeigth))
+        index += 1
+    return img_resized, labels_resized
 
 def reSizeImgAndLabels(img, labels, IMG_Channels):
     if (img.shape == (120, 160, IMG_Channels)):
         return up_size(img, labels, 2)
     elif img.shape == (240, 320, IMG_Channels):
         return up_size(img, labels, 1)
+    elif img.shape == (768,1024, IMG_Channels):
+        return down_sizeMarcin(img, labels)
     else:
         return down_size(img, labels)
 
@@ -179,68 +189,11 @@ def make_square(img, labels, min_size=320):
     return img_with_border, labels_resized
 
 
-def GetGrayImages():
-    print("Image Augementation started")
-    print("Resize, toGray and normalization")
-
-    IMG_Channels = 1
-
-    totalFiles = len(glob.glob(path_to_image))
-    counter = 0
-    for image_path in glob.glob(path_to_image):
-        counter += 1
-        print("[{}/{}]".format(totalFiles, counter))
-        image_name = getImageName(image_path)
-        labels_csv = open(path_to_labels, "r")
-        for row in csv.reader(labels_csv, delimiter=","):
-            if (row[0] == image_name):
-                img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
-                                  int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
-                img = cv2.imread(image_path)
-                img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-                img = np.expand_dims(img, axis=2)
-                imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
-                # one_image, one_label = mirrorIMG(imgResape, labelResape)
-                one_image = imgResape
-                one_label = labelResape
-                imgResape = np.expand_dims(imgResape, axis=2)
-                imgNormalization = imgResape / 255.0
-                labels.append(labelResape)
-                images.append(imgNormalization)
-    return images, labels
-
-
-def GetColorImages():
-    print("Image Augementation started")
-    print("Resize, toGray and normalization")
-
-    IMG_Channels = 3
-
-    totalFiles = len(glob.glob(path_to_image))
-    counter = 0
-    for image_path in glob.glob(path_to_image):
-        counter += 1
-        print("[{}/{}]".format(totalFiles, counter))
-        image_name = getImageName(image_path)
-        labels_csv = open(path_to_labels, "r")
-        for row in csv.reader(labels_csv, delimiter=","):
-            if (row[0] == image_name):
-                img_raw_labels = [int(round(float(row[1]))), int(round(float(row[2]))), int(round(float(row[3]))),
-                                  int(round(float(row[4]))), int(round(float(row[5]))), int(round(float(row[6])))]
-                img = cv2.imread(image_path)
-                imgResape, labelResape = reSizeImgAndLabels(img, img_raw_labels, IMG_Channels)
-                one_image = imgResape
-                one_label = labelResape
-                imgNormalization = imgResape / 255.0
-                labels.append(labelResape)
-                images.append(imgNormalization)
-    showOneImg(images[500])
-    return images, labels
-
-
-def getColorImagesAsRect():
+def getImgAsRect(path_to_image, path_to_labels):
     print("Image Augementation started")
     print("Resize")
+    images = [] 
+    labels = []
 
     IMG_Channels = 3
 
@@ -359,8 +312,10 @@ def rotateImgs(images, labels, degrees):
     showOneImg(rotated_Images[randomIndex], rotated_Lables[randomIndex])
     return rotated_Images, rotated_Lables
 
-def getImgsRaw():
+def getImgsRaw(path_to_image, path_to_labels):
     totalFiles = len(glob.glob(path_to_image))
+    images = [] 
+    labels = []
     counter = 0
     print("Getting imgs")
     for image_path in glob.glob(path_to_image):
@@ -374,7 +329,7 @@ def getImgsRaw():
                 img = cv2.imread(image_path)
                 labels.append(img_raw_labels)
                 images.append(img)
-    print("Done...")
+    print("Done... got #", totalFiles, " images")
     return images, labels
 
 
@@ -383,7 +338,7 @@ def showOneRandomImg(images, labels):
     print('showing image # ', randomIndex)
     showOneImg(images[randomIndex], labels[randomIndex])
 
-def makeListSquare(imgs, labs):
+def makeImgsSquare(imgs, labs):
     print("making img square")
     imgs_rect = []
     labs_rect = []
@@ -397,7 +352,9 @@ def makeListSquare(imgs, labs):
     return imgs_rect, labs_rect
 
 def GetImgsRotatedAndFliped(_rotations):
-    images, labels = getImgsRaw()
+    path_to_image = "FinalDataSet/Images/*.*"
+    path_to_labels = "FinalDataSet/FinalDataPoints.csv"
+    images, labels = getImgsRaw(path_to_image, path_to_labels)
     print("Raw images loaded: ", len(images))
     counter = 0
     img_resized = []
@@ -424,9 +381,9 @@ def GetImgsRotatedAndFliped(_rotations):
     img_to_beRot = None
     lab_to_beRot = None
     print("done...")
-    imgs_rect, labs_rect = makeListSquare(rotated_imgs, rotated_labs)
+    imgs_rect, labs_rect = makeImgsSquare(rotated_imgs, rotated_labs)
 
-    org_imgSQ, org_labSQ = makeListSquare(img_resized, labels_resized)
+    org_imgSQ, org_labSQ = makeImgsSquare(img_resized, labels_resized)
     imgs_rect.extend(org_imgSQ)
     labs_rect.extend(org_labSQ)
     showOneRandomImg(imgs_rect,labs_rect)
@@ -454,6 +411,53 @@ def GetImgsRotatedAndFliped(_rotations):
 
     return img_normalizied, labs_rect
 
+def resizeImages(imgs, labs):
+    print("Resizing imgs")
+    counter = 0
+    img_resized = []
+    labels_resized = []
+    for img in imgs:
+        img, lab = reSizeImgAndLabels(img, labs[counter], 3)
+        img_resized.append(img)
+        labels_resized.append(lab)
+        counter +=1
+    print("number of reSizedImgs: ", len(img_resized))
+    return img_resized, labels_resized
+
+def rotateImages(imgs, labs, rotations):
+    print("Rotating Images")
+    rotations = rotations
+    rotated_imgs = []
+    rotated_labs = []
+    for degrees in rotations:
+        img_to_beRot = imgs.copy()
+        lab_to_beRot = labs.copy()
+        rot_img, rot_lab = rotateImgs(img_to_beRot, lab_to_beRot, degrees)
+        print("adding imgs that have been rotated {} Imgs#: {}".format(degrees, len(rot_img)))
+        rotated_imgs.extend(rot_img)
+        rotated_labs.extend(rot_lab)
+    img_to_beRot = None
+    lab_to_beRot = None
+    rotated_imgs.extend(imgs)
+    rotated_labs.extend(labs)
+    print("done...")
+    return rotated_imgs, rotated_labs
+
+def normalizeImgs(imgs):
+    print("normalizing {} images".format(len(imgs)))
+    img_normalizied = []
+    for img in imgs:
+        img_normalizied.append(img/255.0)
+    print("Done...")
+    return img_normalizied
+
+def shuffleDataset(img, lab):
+    print("shuffling list")
+    c = list(zip(img, lab))
+    random.shuffle(c)
+    images, labels = zip(*c)
+    print("shuffling Done...")
+    return images, labels
 
 def SplitDataSet(_images, _labels):
     train_Img = []
@@ -462,21 +466,14 @@ def SplitDataSet(_images, _labels):
     test_Lab = []
     validation_Img = []
     validation_Lab = []
-    training_Split = 0.7
-    test_Split = 0.15
+    training_Split = 0.8
+    test_Split = 0.05
     val_Split = 0.15
 
     if ((training_Split + test_Split + val_Split) != 1):
         raise AssertionError("splits should add up to to 1")
 
-
-    print("shuffling list")
-    c = list(zip(_images, _labels))
-    random.shuffle(c)
-    _images=None
-    _labels=None
-    images, labels = zip(*c)
-    print("shuffling Done...")
+    images, labels = shuffleDataset(_images, _labels)
     showOneRandomImg(images, labels)
 
     number_of_samples = len(images)
@@ -491,10 +488,144 @@ def SplitDataSet(_images, _labels):
 
     return train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab
 
+def GetMarcinDataset():
+    path_to_MarcinIMG = "ThermalFaceDatabase/*.png"
+    path_to_Marcinlabels = "marcin_coordinates.csv"
+    path_to_image = "FinalDataSet/Images/*.*"
+    path_to_labels = "FinalDataSet/FinalDataPoints.csv"
 
+    #images, labels = getImgsRaw(path_to_MarcinIMG, path_to_Marcinlabels)
+    images, labels = getImgsRaw(path_to_image, path_to_labels)
+    
+    #images.extend(ourImg)
+    #labels.extend(ourLabs)
 
+    train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = SplitDataSet(images, labels)
+    images=None
+    labels = None
+    print("Train")
+    train_Img, train_Lab = resizeImages(train_Img, train_Lab)
+
+    print("Validation")
+    validation_Img, validation_Lab = resizeImages(validation_Img, validation_Lab)
+
+    print("Test")
+    test_Img, test_Lab = resizeImages(test_Img, test_Lab)
+
+    rotated_train_imgs, rotated_train_labs = rotateImages(train_Img, train_Lab, [90, 180, 270])
+
+    rotated_validation_imgs, rotated_validation_lab = rotateImages(validation_Img, validation_Lab, [90,180, 270])
+
+    validation_Img, validation_Lab = makeImgsSquare(rotated_validation_imgs, rotated_validation_lab)
+    test_Img, test_Lab = makeImgsSquare(test_Img, test_Lab)
+    train_Img, train_Lab = makeImgsSquare(rotated_train_imgs, rotated_train_labs)
+
+    print("showing a training img #", len(train_Img))
+    showOneRandomImg(train_Img, train_Lab)
+
+    print("showing a validation img #", len(validation_Img))
+    showOneRandomImg(validation_Img, validation_Lab)
+    
+    print("showing a test img #", len(test_Img))
+    showOneRandomImg(test_Img, test_Lab)
+
+    train_Img = normalizeImgs(train_Img)
+    validation_Img = normalizeImgs(validation_Img)
+    test_Img = normalizeImgs(test_Img)
+
+    train_Img, train_Lab = shuffleDataset(train_Img, train_Lab)
+    validation_Img, validation_Lab = shuffleDataset(validation_Img, validation_Lab)
+    test_Img, test_Lab = shuffleDataset(test_Img, test_Lab)
+    print("******************* Dataset Created *******************")
+    print("TrainImgs: {} TrainLabs: {} \n ValidationImgs: {} ValidationLabs: {} \n TestImg: {} TestLab: {} \n \n".format(
+        len(train_Img),
+        len(train_Lab),
+        len(validation_Img),
+        len(validation_Lab),
+        len(test_Img),
+        len(test_Lab)))
+
+    return train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab
+
+def GetMarcinDatasetAndOurRotated():
+    path_to_MarcinIMG = "ThermalFaceDatabase/*.png"
+    path_to_Marcinlabels = "marcin_coordinates.csv"
+    path_to_image = "FinalDataSet/Images/*.*"
+    path_to_labels = "FinalDataSet/FinalDataPoints.csv"
+
+    images_Marcin, labels_Marcin = getImgsRaw(path_to_MarcinIMG, path_to_Marcinlabels)
+    images, labels = getImgsRaw(path_to_image, path_to_labels)
+    
+    #images.extend(ourImg)
+    #labels.extend(ourLabs)
+
+    train_Img_Marcin, train_Lab_Marcin, validation_Img_Marcin, validation_Lab_Marcin, test_Img_Marcin, test_Lab_Marcin = SplitDataSet(images_Marcin, labels_Marcin)
+    
+    train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = SplitDataSet(images, labels)
+
+    images=None
+    labels = None
+    print("Train")
+    train_Img_Marcin, train_Lab_Marcin = resizeImages(train_Img_Marcin, train_Lab_Marcin)
+    train_Img, train_Lab = resizeImages(train_Img, train_Lab)
+
+    print("Validation")
+    validation_Img, validation_Lab = resizeImages(validation_Img, validation_Lab)
+    validation_Img_Marcin, validation_Lab_Marcin = resizeImages(validation_Img_Marcin, validation_Lab_Marcin)
+
+    print("Test")
+    test_Img, test_Lab = resizeImages(test_Img, test_Lab)
+    test_Img_Marcin, test_Lab_Marcin = resizeImages(test_Img_Marcin, test_Lab_Marcin)
+
+    rotated_train_imgs, rotated_train_labs = rotateImages(train_Img, train_Lab, [])
+
+    rotated_validation_imgs, rotated_validation_lab = rotateImages(validation_Img, validation_Lab, [])
+
+    print("Training: \nour {} + Marcin {} in total: {}".format(len(rotated_train_imgs), len(train_Img_Marcin), (len(rotated_train_imgs)+len(train_Img_Marcin))))
+    rotated_train_imgs.extend(train_Img_Marcin)
+    rotated_train_labs.extend(train_Lab_Marcin)
+
+    print("Validation: \nour {} + Marcin {} in total: {}".format(len(rotated_validation_imgs), len(validation_Img_Marcin), (len(rotated_validation_imgs)+len(validation_Img_Marcin))))
+    rotated_validation_imgs.extend(validation_Img_Marcin)
+    rotated_validation_lab.extend(validation_Lab_Marcin)
+
+    print("Test: \nour {} + Marcin {} in total: {}".format(len(test_Img), len(test_Img_Marcin), (len(test_Img)+len(test_Img_Marcin))))
+    test_Img.extend(test_Img_Marcin)
+    test_Lab.extend(test_Lab_Marcin)
+
+    validation_Img, validation_Lab = makeImgsSquare(rotated_validation_imgs, rotated_validation_lab)
+    test_Img, test_Lab = makeImgsSquare(test_Img, test_Lab)
+    train_Img, train_Lab = makeImgsSquare(rotated_train_imgs, rotated_train_labs)
+
+    print("showing a training img #", len(train_Img))
+    showOneRandomImg(train_Img, train_Lab)
+
+    print("showing a validation img #", len(validation_Img))
+    showOneRandomImg(validation_Img, validation_Lab)
+    
+    print("showing a test img #", len(test_Img))
+    showOneRandomImg(test_Img, test_Lab)
+
+    train_Img = normalizeImgs(train_Img)
+    validation_Img = normalizeImgs(validation_Img)
+    test_Img = normalizeImgs(test_Img)
+
+    train_Img, train_Lab = shuffleDataset(train_Img, train_Lab)
+    validation_Img, validation_Lab = shuffleDataset(validation_Img, validation_Lab)
+    test_Img, test_Lab = shuffleDataset(test_Img, test_Lab)
+
+    print("******************* Dataset Created *******************")
+    print("TrainImgs: {} TrainLabs: {} \n ValidationImgs: {} ValidationLabs: {} \n TestImg: {} TestLab: {} \n \n".format(
+        len(train_Img),
+        len(train_Lab),
+        len(validation_Img),
+        len(validation_Lab),
+        len(test_Img),
+        len(test_Lab)))
+
+    return train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab
 #https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
 #img, labs = GetImgsRotatedAndFliped()
 #showOneRandomImg(img, labs)
-
+GetMarcinDatasetAndOurRotated() 
 

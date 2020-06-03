@@ -19,15 +19,9 @@ print("Eager execution: {}".format(tf.executing_eagerly()))
 IMG_SHAPE = (320, 320, 3)
 
 # Load the data into tf
-images, labels = DataManager.GetImgsRotatedAndFliped([90, 180, 270])
-totalImg = len(images)
-
-train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.GetMarcinDataset()
 
 print("**** startinmg *****")
-print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img),
-                                                                                       len(validation_Img),
-                                                                                       len(test_Img)))
 print(("showning from training"))
 DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
@@ -68,11 +62,10 @@ upsam3 = UpSampling2D((2, 2))(uconv3)
 uconv4a = Conv2D(filters=32, kernel_size=3, padding="same", activation="relu")(upsam3)
 conca3 = Concatenate(axis=3)([conv1a, uconv4a])
 uconv5 = Conv2D(filters=32, kernel_size=3, padding="same", activation="relu")(conca3)
-uconv5 = Conv2D(filters=32, kernel_size=3, padding="same", activation="relu")(uconv5)
 
 finalConv = Conv2D(filters=2, kernel_size=2, padding="same", activation="relu")(uconv5)
 flatting = tf.keras.layers.Flatten()(finalConv)
-dense1 = tf.keras.layers.Dense(units=256, activation='relu')(flatting)
+dense1 = tf.keras.layers.Dense(units=128, activation='relu')(flatting) #changed from 256
 output = tf.keras.layers.Dense(units=6)(dense1)
 
 model = tf.keras.models.Model(inputLayer, output)
@@ -80,26 +73,26 @@ model = tf.keras.models.Model(inputLayer, output)
 model.summary()
 
 # Keep only a single checkpoint, the best over test accuracy.
-modelName = "SmallEncoderDecoder"
-filepath = "checkpoints/checkpoint_SmallEncoderDecoder_RGB-{epoch:04d}-{val_loss:.2f}.hdf5"
+modelName = "SmallEncDec_OurImgs128"
+filepath = "checkpoints/ckpt_SmallEncDec_OurImgs128-{epoch:04d}-{val_mean_absolute_error:.2f}.h5"
 checkpoint = ModelCheckpoint(filepath,
-                             monitor='val_accuracy',
+                             monitor='val_mean_absolute_error',
                              verbose=1,
                              save_best_only=True,
                              mode='auto',
                              period=1)
 
-csv_fileName = "logs/CSV_log_RGB_{}.csv".format(modelName)
+csv_fileName = "logs/log_{}.csv".format(modelName)
 logger = tf.keras.callbacks.CSVLogger(
     csv_fileName, separator=',', append=False
 )
 
-model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="mean_squared_error", optimizer="adam", metrics=["mean_absolute_error"])
 
-model.fit(x=train_Img, y=train_Lab, epochs=300, batch_size=1, validation_data=(validation_Img, validation_Lab),
+model.fit(x=np.array(train_Img), y=np.array(train_Lab), epochs=300, batch_size=1, validation_data=(np.array(validation_Img), np.array(validation_Lab)),
           callbacks=[checkpoint, logger])
 
-model.save("./savedModels/RGB_{}.h5".format(modelName))
+model.save("./savedModels/{}.h5".format(modelName))
 
 loss, acc = model.evaluate(x=test_Img, y=test_Lab)
 print("Model performance:\n loss: {} \n Accuracy: {}".format(loss, acc))

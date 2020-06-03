@@ -6,4 +6,5 @@
 /logs/*.csv
 /checkpoints/
 __pycache__/
-.gitignore
+/ThermalDB/
+/ThermalFaceDatabase/

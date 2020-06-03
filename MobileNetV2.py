@@ -38,15 +38,12 @@ model = tf.keras.models.Model(inputs=base_model.input, outputs=prediction_layer)
 model.summary()
 
 #compiling the model
-model.compile(optimizer="adam", loss="mean_absolute_error", metrics=['accuracy'])
+model.compile(optimizer="adam", loss="mean_squared_error", metrics=['mean_absolute_error'])
 
 
 #Data agumentation
-images, labels = DataManager.GetImgsRotatedAndFliped()
-totalImg = len(images)
-train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.SplitDataSet(images, labels)
+train_Img, train_Lab, validation_Img, validation_Lab, test_Img, test_Lab = DataManager.GetMarcinDataset()
 
-print("TotalImgs: {} TrainSet size: {} validationSet size: {} testSet size: {}".format(totalImg, len(train_Img), len(validation_Img), len(test_Img)))
 print(("showning from training"))
 DataManager.showOneRandomImg(train_Img, train_Lab)
 print("showing from val")
@@ -69,10 +66,10 @@ logger = CSVLogger(
 )
 
 #training
-model.fit(train_Img, train_Lab, batch_size=32 , epochs=500, validation_data=(validation_Img, validation_Lab), callbacks=[checkpoint, logger])
+model.fit(np.array(train_Img), np.array(train_Lab), batch_size=64 , epochs=100, validation_data=(np.array(validation_Img), np.array(validation_Lab)), callbacks=[logger])
 
 model.save("./savedModels/RGB_{}.h5".format(modelName))
 
 print("evaluating")
-loss,acc = model.evaluate(x= test_Img, y=test_Lab)
+loss,acc = model.evaluate(x= np.array(test_Img), y=np.array(test_Lab))
 print("Model performance:\n loss: {} \n Accuracy: {}".format(loss,acc))
