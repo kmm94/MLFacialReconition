@@ -555,9 +555,6 @@ def GetMarcinDatasetAndOurRotated():
 
     images_Marcin, labels_Marcin = getImgsRaw(path_to_MarcinIMG, path_to_Marcinlabels)
     images, labels = getImgsRaw(path_to_image, path_to_labels)
-    
-    #images.extend(ourImg)
-    #labels.extend(ourLabs)
 
     train_Img_Marcin, train_Lab_Marcin, validation_Img_Marcin, validation_Lab_Marcin, test_Img_Marcin, test_Lab_Marcin = SplitDataSet(images_Marcin, labels_Marcin)
     
@@ -627,5 +624,5 @@ def GetMarcinDatasetAndOurRotated():
 #https://stackoverflow.com/questions/23289547/shuffle-two-list-at-once-with-same-order to shuffle bout list
 #img, labs = GetImgsRotatedAndFliped()
 #showOneRandomImg(img, labs)
-GetMarcinDatasetAndOurRotated() 
+
 
