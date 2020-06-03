@@ -1,0 +1,4 @@
+observationId,cprNumber,filepath,filename,eyePositionX,eyePositionY,nosePositionX,nosePositionY,eyeTemperature,noseTemperature,gradient,eyeMarkerAdjusted,noseMarkerAdjusted,chosenAlgorithm
+6,km,/storage/emulated/0/Android/data/rubenkarim.com.masterthesisapp/files/Pictures/Masterthesisimages/Thermal_Test_img.jpg,Thermal_Test_img.jpg,221,213,204,265,26.55980133593181,25.836668778271587,0.7231325576602217,false,false,CNNWithTransferLearning
+7,test2,/storage/emulated/0/Android/data/rubenkarim.com.masterthesisapp/files/Pictures/Masterthesisimages/29-05-2020_21:58:00.jpg,29-05-2020_215800.jpg,258,288,240,356,29.79334373085993,27.169876353863344,2.6234673769965866,false,false,MinMaxTemplate
+8,test 3 ,/storage/emulated/0/Android/data/rubenkarim.com.masterthesisapp/files/Pictures/Masterthesisimages/29-05-2020_22:12:41.jpg,29-05-2020_221241.jpg,286,294,240,373,32.695047886980774,30.601367985416914,2.09367990156386,false,false,MinMaxTemplate
